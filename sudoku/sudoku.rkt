@@ -1,7 +1,7 @@
 #lang racket
 (require (file "utility.rkt"))
 
-; A data type for partial puzzles
+(provide make-puzzle puzzle-width puzzle-ref puzzle-print)
 
 (define (make-puzzle (n 3))
   (define width (square n))
@@ -24,4 +24,3 @@
       (for ([x width])
         (display (format " ~a |" (puzzle-ref p x y)))))
     (display-line #t)))
-
