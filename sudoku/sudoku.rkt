@@ -1,5 +1,6 @@
 #lang racket
-(require (file "utility.rkt"))
+(require (file "utility.rkt")
+         (file "position.rkt"))
 
 (provide make-puzzle puzzle-width puzzle-ref puzzle-print)
 
@@ -10,9 +11,13 @@
               (λ (y) (build-list width
                                  (λ (x) 0)))))
 
-(define (puzzle-width p) (length p))
+(define (puzzle-width p)
+  (length p))
 
-(define (puzzle-ref p x y) (list-ref (list-ref p y) x))
+(define (puzzle-ref p pos)
+  (let ([x (pos-get-x pos)]
+        [y (pos-get-y pos)])
+    (list-ref (list-ref p y) x)))
 
 (define (puzzle-print p)
   (let* ([width (puzzle-width p)]
