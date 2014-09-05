@@ -2,14 +2,17 @@
 (require (file "utility.rkt")
          (file "position.rkt"))
 
-(provide make-puzzle puzzle-width puzzle-ref puzzle-print)
+(provide make-puzzle make-empty-puzzle puzzle-width puzzle-ref puzzle-print)
 
-(define (make-puzzle (n 3))
+(define (make-empty-puzzle (n 3))
   (define width (square n))
   
   (build-list width
               (λ (y) (build-list width
                                  (λ (x) 0)))))
+
+(define (make-puzzle (n 3))
+  (void))
 
 (define (puzzle-width p)
   (length p))
@@ -27,5 +30,5 @@
     (for ([y width])
       (display-line #f)
       (for ([x width])
-        (display (format " ~a |" (puzzle-ref p x y)))))
+        (display (format " ~a |" (puzzle-ref p (make-pos x y))))))
     (display-line #t)))

@@ -1,6 +1,26 @@
 #lang racket
 
-(require (file "sudoku.rkt"))
+(require (file "sudoku.rkt")
+         (file "position.rkt"))
+
+(define (assert x)
+  (if x (void) (error "Tests failed")))
+
+(define (with-output-port fn)
+  (let ([output (current-output-port)]
+        [str (open-output-string)])
+    (current-output-port str)
+    (fn)
+    (current-output-port output)
+    (get-output-string str)))
+
+(assert (= (pos-get-x (make-pos 123 321)) 123))
+(assert (= (pos-get-y (make-pos 123 321)) 321))
+(assert (pos=? (make-pos 0 0) (make-pos 0 0)))
+(assert (not (pos=? (make-pos 0 1) (make-pos 0 0))))
+(assert (pos=? (make-pos 0 0) (pos-backward (make-pos 1 0) 9)))
+(assert (pos=? (make-pos 8 0) (pos-backward (make-pos 0 1) 9)))
+(assert (string=? (with-output-port (λ () (pos-print (make-pos 1 2)))) "(1, 2)"))
 
 (define test-board-zero
   '((0 0 0 0 0 0 0 0 0)
@@ -14,7 +34,8 @@
     (0 0 0 0 0 0 0 0 0)))
 
 (assert (= (puzzle-width test-board-zero) 9))
-(assert (= (puzzle-ref test-board-zero 0 0) 0))
+(assert (= (puzzle-ref test-board-zero (make-pos 0 0)) 0))
+(assert (equal? test-board-zero (make-empty-puzzle)))
 
 (define test-board-unsolved
   '((5 3 0 0 7 0 0 0 0)
@@ -28,7 +49,8 @@
     (0 0 0 0 8 0 0 7 9)))
 
 (assert (= (puzzle-width test-board-unsolved) 9))
-(assert (= (puzzle-ref test-board-unsolved 0 0) 5))
+(assert (= (puzzle-ref test-board-unsolved (make-pos 0 0)) 5))
+(assert (= (puzzle-ref test-board-unsolved (make-pos 1 0)) 3))
 
 (define test-board-solved
   '((5 3 4 6 7 8 9 1 2)
