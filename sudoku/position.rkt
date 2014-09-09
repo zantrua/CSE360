@@ -1,6 +1,6 @@
 #lang racket
 (require (file "utility.rkt"))
-(provide make-pos pos-get-x pos-get-y pos-get-values pos=? pos-backward pos-forward pos-print)
+(provide make-pos pos-get-x pos-get-y pos-get-values pos=? pos-backward pos-forward pos-print tile-function)
 
 (define (make-pos x y)
   (cons x y))
@@ -38,3 +38,8 @@
   
 (define (pos-print p)
   (display (format "(~a, ~a)" (pos-get-x p) (pos-get-y p))))
+
+(define (tile-function f width)
+  (build-list width
+              (λ (y) (build-list width
+                                 (λ (x) (f (make-pos x y)))))))

@@ -12,6 +12,23 @@
 
 (define (make-puzzle (n 3))
   (define width (square n))
+  
+  (define (step p pos)
+    (if (not pos)
+        (partial-puzzle->puzzle p)
+        (let* ([tile-pred-function (λ (f)
+                                     (tile-function (λ (in-pos)
+                                                      (if (pos=? pos in-pos)
+                                                          (f pos)
+                                                          (puzzle-ref p pos)))))]
+               [reset-tile (λ (p) (tile-pred-function (λ (pos) (list 0 (build-list width (λ (n) (1+ n)))))))]
+               [clear-tile (λ (p) (tile-pred-function (λ (pos) (list 0 (partial-puzzle-ref-numbers p pos)))))]
+               [set-tile (λ (p) (tile-pred-function (λ (pos)
+                                                      (let* ([lst (partial-puzzle-ref-numbers p pos)]
+                                                             [idx (random (length lst))]
+                                                             [val (list-ref lst idx)])
+                                                        (list val (remove-index lst idx))))))])
+            (void))))
   (void))
 
 (define (puzzle-solved? p (exact #f))
