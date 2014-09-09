@@ -23,12 +23,15 @@
           (puzzle-ref p pos)
           #f))
     (define set (filter-map get-cell (cartesian-product (range width) (range width))))
-    (set=? (list->set set) (list->set (range 1 (1+ width)))))
+    (if exact
+        (set=? (list->set set) (list->set (range 1 (1+ width))))
+        (= (length set) (length (remove-duplicates set (λ (a b) (and (= a b)
+                                                                     (not (= a 0)))))))))
   
   (andmap (λ (proc) (check-set p proc))
           (append (map (λ (n) (λ (pos) (= (pos-get-x pos) n))) (range width))
                   (map (λ (n) (λ (pos) (= (pos-get-y pos) n))) (range width))
-                  (void) ; TODO: Check each square here
+                  (void) ; Check each square here
                   )))
 
 (define (puzzle-width p)
