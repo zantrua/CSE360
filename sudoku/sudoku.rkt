@@ -1,23 +1,17 @@
 #lang racket
 
 (require (file "utility.rkt")
-         (file "position.rkt"))
+         (file "position.rkt")
+         (file "partial-puzzle.rkt"))
 
 (provide make-puzzle make-empty-puzzle puzzle-width puzzle-ref puzzle-print)
 
 (define (make-empty-puzzle (n 3))
   (define width (square n))
-  
-  (build-list width
-              (λ (y) (build-list width
-                                 (λ (x) 0)))))
+  (tile-function (λ (x y) 0) width))
 
 (define (make-puzzle (n 3))
   (define width (square n))
-  (define (step p pos)
-    (if (not pos)
-        (partial-puzzle->puzzle p)
-        (void)))
   (void))
          
 
