@@ -8,7 +8,7 @@
 
 (define (make-empty-puzzle (n 3))
   (define width (square n))
-  (tile-function (λ (x y) 0) width))
+  (tile-function (λ (pos) 0) width))
 
 (define (make-puzzle (n 3))
   (define width (square n))
