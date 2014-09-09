@@ -4,7 +4,7 @@
          (file "position.rkt")
          (file "partial-puzzle.rkt"))
 
-(provide make-puzzle make-empty-puzzle puzzle-width puzzle-ref puzzle-print)
+(provide make-empty-puzzle make-puzzle check-puzzle puzzle-width puzzle-ref puzzle-print)
 
 (define (make-empty-puzzle (n 3))
   (define width (square n))
@@ -13,7 +13,23 @@
 (define (make-puzzle (n 3))
   (define width (square n))
   (void))
-         
+
+(define (check-puzzle p (exact #f))
+  (define width (puzzle-width p))
+  
+  (define (check-set p proc)
+    (define (get-cell pos)
+      (if (proc pos)
+          (puzzle-ref p pos)
+          #f))
+    (define set (filter-map get-cell (cartesian-product (range width) (range width))))
+    (set=? (list->set set) (list->set (range 1 (1+ width)))))
+  
+  (andmap (λ (proc) (check-set p proc))
+          (append (map (λ (n) (λ (pos) (= (pos-get-x pos) n))) (range width))
+                  (map (λ (n) (λ (pos) (= (pos-get-y pos) n))) (range width))
+                  (void) ; TODO: Check each square here
+                  )))
 
 (define (puzzle-width p)
   (length p))

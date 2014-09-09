@@ -38,6 +38,7 @@
 (assert (= (puzzle-width test-board-zero) 9))
 (assert (= (puzzle-ref test-board-zero (make-pos 0 0)) 0))
 (assert (equal? test-board-zero (make-empty-puzzle)))
+(assert (not (check-puzzle test-board-zero)))
 
 (define test-board-unsolved
   '((5 3 0 0 7 0 0 0 0)
@@ -53,6 +54,7 @@
 (assert (= (puzzle-width test-board-unsolved) 9))
 (assert (= (puzzle-ref test-board-unsolved (make-pos 0 0)) 5))
 (assert (= (puzzle-ref test-board-unsolved (make-pos 1 0)) 3))
+(assert (not (check-puzzle test-board-unsolved)))
 
 (define test-board-solved
   '((5 3 4 6 7 8 9 1 2)
@@ -65,6 +67,8 @@
     (2 8 7 4 1 9 6 3 5)
     (3 4 5 2 8 6 1 7 9)))
 
+(assert (check-puzzle test-board-solved #t))
+
 (define test-board-incorrect
   '((5 3 4 6 7 8 9 2 1) ; the last two elements are flipped
     (6 7 2 1 9 5 3 4 8) ; so this board is incorrect
@@ -76,6 +80,8 @@
     (2 8 7 4 1 9 6 3 5)
     (3 4 5 2 8 6 1 7 9)))
 
+(assert (not (check-puzzle test-board-incorrect)))
+
 (define test-board-incorrect-2
   '((5 3 4 6 7 8 9 1 1) ; the last two elements are repeated
     (6 7 2 1 9 5 3 4 8) ; so this board is incorrect
@@ -86,5 +92,7 @@
     (9 6 1 5 3 7 2 8 4)
     (2 8 7 4 1 9 6 3 5)
     (3 4 5 2 8 6 1 7 9)))
+
+(assert (not (check-puzzle test-board-incorrect-2)))
 
 (display "Tests completed")

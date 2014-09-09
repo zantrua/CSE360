@@ -1,6 +1,6 @@
 #lang racket
 
-(provide square 1+ 1- tile-function)
+(provide square 1+ 1- tile-function cartesian-product)
 
 (define (square n) (* n n))
 
@@ -12,3 +12,8 @@
   (build-list width
               (λ (y) (build-list width
                                  (λ (x) (f x y))))))
+
+(define (cartesian-product a b)
+  (foldl (λ (lst out) (append out lst)) empty
+         (map (λ (x) (map (λ (y) (cons x y)) b)) a)))
+
