@@ -1,4 +1,5 @@
 #lang racket
+
 (require (file "utility.rkt")
          (file "position.rkt"))
 
@@ -12,14 +13,19 @@
                                  (λ (x) 0)))))
 
 (define (make-puzzle (n 3))
+  (define width (square n))
+  (define (step p pos)
+    (if (not pos)
+        (partial-puzzle->puzzle p)
+        (void)))
   (void))
+         
 
 (define (puzzle-width p)
   (length p))
 
 (define (puzzle-ref p pos)
-  (let ([x (pos-get-x pos)]
-        [y (pos-get-y pos)])
+  (let-values ([(x y) (pos-get-values pos)])
     (list-ref (list-ref p y) x)))
 
 (define (puzzle-print p)
