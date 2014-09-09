@@ -4,7 +4,7 @@
          (file "position.rkt")
          (file "partial-puzzle.rkt"))
 
-(provide make-empty-puzzle make-puzzle check-puzzle puzzle-width puzzle-ref puzzle-print)
+(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref puzzle-print)
 
 (define (make-empty-puzzle (n 3))
   (define width (square n))
@@ -14,7 +14,7 @@
   (define width (square n))
   (void))
 
-(define (check-puzzle p (exact #f))
+(define (puzzle-solved? p (exact #f))
   (define width (puzzle-width p))
   
   (define (check-set p proc)
@@ -28,11 +28,20 @@
         (= (length set) (length (remove-duplicates set (λ (a b) (and (= a b)
                                                                      (not (= a 0)))))))))
   
+  (define (in-square? pos n)
+    (let* ([sqrt-width (sqrt width)]
+           [square-x (modulo n 3)]
+           [square-y (quotient n 3)]
+           [start-x (* sqrt-width square-x)]
+           [start-y (* sqrt-width square-y)])
+      (let-values ([(x y) (pos-get-values pos)])
+        (and (member x (range start-x (+ start-x sqrt-width)))
+             (member y (range start-y (+ start-y sqrt-width)))))))
+  
   (andmap (λ (proc) (check-set p proc))
           (append (map (λ (n) (λ (pos) (= (pos-get-x pos) n))) (range width))
                   (map (λ (n) (λ (pos) (= (pos-get-y pos) n))) (range width))
-                  (void) ; Check each square here
-                  )))
+                  (map (λ (n) (λ (pos) (in-square? pos n))) (range width)))))
 
 (define (puzzle-width p)
   (length p))
