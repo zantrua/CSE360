@@ -20,6 +20,8 @@
 (assert (not (pos=? (make-pos 0 1) (make-pos 0 0))))
 (assert (pos=? (make-pos 0 0) (pos-backward (make-pos 1 0) 9)))
 (assert (pos=? (make-pos 8 0) (pos-backward (make-pos 0 1) 9)))
+(assert (pos=? (make-pos 2 0) (pos-forward (make-pos 1 0) 9)))
+(assert (pos=? (make-pos 0 1) (pos-forward (make-pos 8 0) 9)))
 (assert (string=? (with-output-port (λ () (pos-print (make-pos 1 2)))) "(1, 2)"))
 
 (define test-board-zero
