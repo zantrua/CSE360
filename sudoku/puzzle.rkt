@@ -21,12 +21,12 @@
                                                       (if (pos=? pos in-pos)
                                                           (f in-pos)
                                                           (partial-puzzle-ref p in-pos))) width))]
-               [reset-tile (λ (p) (tile-pred-function (λ (pos) (list 0 (build-list width (λ (n) (1+ n)))))))]
-               [clear-tile (λ (p) (tile-pred-function (λ (pos) (list 0 (partial-puzzle-ref-numbers p pos)))))]
+               [reset-tile (λ (p) (tile-pred-function (λ (pos) (make-partial-puzzle-tile n))))]
+               [clear-tile (λ (p) (tile-pred-function (λ (pos) (make-partial-puzzle-tile n 0 (partial-puzzle-ref-numbers p pos)))))]
                [set-tile (λ (p) (tile-pred-function (λ (pos) (let* ([lst (partial-puzzle-ref-numbers p pos)]
                                                                     [idx (random (length lst))]
                                                                     [val (list-ref lst idx)])
-                                                               (list val (remove-index lst idx))))))])
+                                                               (make-partial-puzzle-tile n val (remove-index lst idx))))))])
           (if (empty? (partial-puzzle-ref-numbers p pos))
               (step (reset-tile p) (pos-backward pos width))
               (let ([p (set-tile p)])
