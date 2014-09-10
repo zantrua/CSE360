@@ -4,8 +4,9 @@
          (file "position.rkt"))
 (provide make-partial-puzzle partial-puzzle-width partial-puzzle-ref partial-puzzle-ref-tile partial-puzzle-ref-numbers partial-puzzle->puzzle)
 
-(define (make-partial-puzzle width)
-  (tile-function (λ (x y) (list 0 (build-list width (λ (n) (1+ n)))))))
+(define (make-partial-puzzle (n 3))
+  (define width (square n))
+  (tile-function (λ (pos) (list 0 (build-list width (λ (n) (1+ n))))) width))
 
 (define (partial-puzzle-width p)
   (length p))
@@ -15,12 +16,10 @@
     (list-ref (list-ref p y) x)))
 
 (define (partial-puzzle-ref-tile p pos)
-  (let-values ([(x y) (pos-get-values pos)])
-    (first (partial-puzzle-ref p x y))))
+  (first (partial-puzzle-ref p pos)))
 
 (define (partial-puzzle-ref-numbers p pos)
-  (let-values ([(x y) (pos-get-values pos)])
-    (second (partial-puzzle-ref p x y))))
+  (second (partial-puzzle-ref p pos)))
   
 (define (partial-puzzle->puzzle p)
-  (tile-function (λ (x y) (partial-puzzle-ref-tile p x y)) (partial-puzzle-width p)))
+  (tile-function (λ (pos) (partial-puzzle-ref-tile p pos)) (partial-puzzle-width p)))

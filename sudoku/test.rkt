@@ -1,6 +1,6 @@
 #lang racket
 
-(require (file "sudoku.rkt")
+(require (file "puzzle.rkt")
          (file "position.rkt"))
 
 (define (assert x)
@@ -68,6 +68,7 @@
     (2 8 7 4 1 9 6 3 5)
     (3 4 5 2 8 6 1 7 9)))
 
+(assert (puzzle-solved? test-board-solved ))
 (assert (puzzle-solved? test-board-solved #t))
 
 (define test-board-incorrect
@@ -82,6 +83,7 @@
     (3 4 5 2 8 6 1 7 9)))
 
 (assert (not (puzzle-solved? test-board-incorrect)))
+(assert (not (puzzle-solved? test-board-incorrect #t)))
 
 (define test-board-incorrect-2
   '((5 3 4 6 7 8 9 1 1) ; the last two elements are repeated
@@ -94,6 +96,10 @@
     (2 8 7 4 1 9 6 3 5)
     (3 4 5 2 8 6 1 7 9)))
 
+(assert (not (puzzle-solved? test-board-incorrect-2 #t)))
 (assert (not (puzzle-solved? test-board-incorrect-2)))
+
+(for ([i 10])
+  (assert (puzzle-solved? (make-puzzle) #t)))
 
 (display "Tests completed")
