@@ -11,58 +11,54 @@
   (tile-function (λ (pos) 0) width))
 
 (define (make-puzzle (n 3))
-  (define width (square n))
-  
-  (define (step p pos)
-    (if (not pos)
-        (partial-puzzle->puzzle p)
-        (let* ([tile-pred-function (λ (f)
-                                     (tile-function (λ (in-pos)
-                                                      (if (pos=? pos in-pos)
-                                                          (f in-pos)
-                                                          (partial-puzzle-ref p in-pos))) width))]
-               [reset-tile (λ (p) (tile-pred-function (λ (pos) (make-partial-puzzle-tile n))))]
-               [clear-tile (λ (p) (tile-pred-function (λ (pos) (make-partial-puzzle-tile n 0 (partial-puzzle-ref-numbers p pos)))))]
-               [set-tile (λ (p) (tile-pred-function (λ (pos) (let* ([lst (partial-puzzle-ref-numbers p pos)]
-                                                                    [idx (random (length lst))]
-                                                                    [val (list-ref lst idx)])
-                                                               (make-partial-puzzle-tile n val (remove-index lst idx))))))])
-          (if (empty? (partial-puzzle-ref-numbers p pos))
-              (step (reset-tile p) (pos-backward pos width))
-              (let ([p (set-tile p)])
-                (if (puzzle-solved? (partial-puzzle->puzzle p))
-                    (step p (pos-forward pos width))
-                    (step (clear-tile p) pos)))))))
-  (step (make-partial-puzzle n) (make-pos 0 0)))
+  (letrec ([width (square n)]
+           [step  (λ (p pos)
+                    (if (not pos)
+                        (partial-puzzle->puzzle p)
+                        (let* ([tile-pred-function (λ (f)
+                                                     (tile-function (λ (in-pos)
+                                                                      (if (pos=? pos in-pos)
+                                                                          (f in-pos)
+                                                                          (partial-puzzle-ref p in-pos))) width))]
+                               [reset-tile (λ (p) (tile-pred-function (λ (pos) (make-partial-puzzle-tile n))))]
+                               [clear-tile (λ (p) (tile-pred-function (λ (pos) (make-partial-puzzle-tile n 0 (partial-puzzle-ref-numbers p pos)))))]
+                               [set-tile (λ (p) (tile-pred-function (λ (pos) (let* ([lst (partial-puzzle-ref-numbers p pos)]
+                                                                                    [idx (random (length lst))]
+                                                                                    [val (list-ref lst idx)])
+                                                                               (make-partial-puzzle-tile n val (remove-index lst idx))))))])
+                          (if (empty? (partial-puzzle-ref-numbers p pos))
+                              (step (reset-tile p) (pos-backward pos width))
+                              (let ([p (set-tile p)])
+                                (if (puzzle-solved? (partial-puzzle->puzzle p))
+                                    (step p (pos-forward pos width))
+                                    (step (clear-tile p) pos)))))))])
+    (step (make-partial-puzzle n) (make-pos 0 0))))
 
 (define (puzzle-solved? p (exact #f))
-  (define width (puzzle-width p))
-  
-  (define (check-set p proc)
-    (define (get-cell pos)
-      (if (proc pos)
-          (puzzle-ref p pos)
-          #f))
-    (define set (filter-map get-cell (cartesian-product (range width) (range width))))
-    (if exact
-        (set=? (list->set set) (list->set (range 1 (1+ width))))
-        (= (length set) (length (remove-duplicates set (λ (a b) (and (= a b)
-                                                                     (not (= a 0)))))))))
-  
-  (define (in-square? pos n)
-    (let* ([sqrt-width (sqrt width)]
-           [square-x (modulo n 3)]
-           [square-y (quotient n 3)]
-           [start-x (* sqrt-width square-x)]
-           [start-y (* sqrt-width square-y)])
-      (let-values ([(x y) (pos-get-values pos)])
-        (and (member x (range start-x (+ start-x sqrt-width)))
-             (member y (range start-y (+ start-y sqrt-width)))))))
-  
-  (andmap (λ (proc) (check-set p proc))
-          (append (map (λ (n) (λ (pos) (= (pos-get-x pos) n))) (range width))
-                  (map (λ (n) (λ (pos) (= (pos-get-y pos) n))) (range width))
-                  (map (λ (n) (λ (pos) (in-square? pos n))) (range width)))))
+  (let* ([width (puzzle-width p)]
+         [check-set (λ (p proc)
+                      (let* ([get-cell (λ (pos)
+                                         (if (proc pos)
+                                             (puzzle-ref p pos)
+                                             #f))]
+                             [set (filter-map get-cell (cartesian-product (range width) (range width)))])
+                        (if exact
+                            (set=? (list->set set) (list->set (range 1 (1+ width))))
+                            (= (length set) (length (remove-duplicates set (λ (a b) (and (= a b)
+                                                                                         (not (= a 0))))))))))]
+         [in-square? (λ (pos n)
+                       (let* ([sqrt-width (sqrt width)]
+                              [square-x (modulo n 3)]
+                              [square-y (quotient n 3)]
+                              [start-x (* sqrt-width square-x)]
+                              [start-y (* sqrt-width square-y)])
+                         (let-values ([(x y) (pos-get-values pos)])
+                           (and (member x (range start-x (+ start-x sqrt-width)))
+                                (member y (range start-y (+ start-y sqrt-width)))))))])
+    (andmap (λ (proc) (check-set p proc))
+            (append (map (λ (n) (λ (pos) (= (pos-get-x pos) n))) (range width))
+                    (map (λ (n) (λ (pos) (= (pos-get-y pos) n))) (range width))
+                    (map (λ (n) (λ (pos) (in-square? pos n))) (range width))))))
 
 (define (puzzle-width p)
   (length p))

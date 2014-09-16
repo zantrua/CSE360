@@ -24,8 +24,8 @@
                             (let*-values ([(text) (format "~a" (puzzle-ref puzzle (make-pos x y)))]
                                           [(text-width text-height descender ascender) (send dc get-text-extent text)]
                                           [(offset) (+ (/ gap 2) (/ (send thick-line-pen get-width) 2))]
-                                          [(text-x) (+ offset (* x gap) (/ text-width -2)]
-                                          [(text-y) (+ offset (* y gap) (/ text-height -2)])
+                                          [(text-x) (+ offset (* x gap) (/ text-width -2))]
+                                          [(text-y) (+ offset (* y gap) (/ text-height -2))])
                               (send dc draw-text text text-x text-y)))))]
          [sudoku-canvas% (let ([last-event-type ""])
                            (class canvas%
