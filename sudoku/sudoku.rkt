@@ -6,7 +6,7 @@
          racket/gui)
 
 (letrec ([frame-size 800]
-         [puzzle (make-puzzle)]
+         [puzzle (puzzle-unsolve (make-puzzle))]
          [thick-line-pen (send the-pen-list find-or-create-pen "black" 3 'solid)]
          [thin-line-pen (send the-pen-list find-or-create-pen "black" 1 'solid)]
          [sudoku-draw (λ (canvas dc)

@@ -4,7 +4,7 @@
          (file "position.rkt")
          (file "partial-puzzle.rkt"))
 
-(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref puzzle-print)
+(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref puzzle-print puzzle-unsolve)
 
 (define (make-empty-puzzle (n 3))
   (define width (square n))
@@ -88,5 +88,5 @@
                                     (remove-step p steps)
                                     (remove-step (tile-function (λ (pos) (if (pos=? pos rand-pos)
                                                                              0
-                                                                             (puzzle-ref p pos)))) width)))))])
+                                                                             (puzzle-ref p pos))) width) (1- steps))))))])
     (remove-step p (floor (* (square width) part-to-remove)))))
