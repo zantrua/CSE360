@@ -77,3 +77,16 @@
       (for ([x width])
         (display (format " ~a |" (puzzle-ref p (make-pos x y))))))
     (display-line #t)))
+
+(define (puzzle-unsolve p (part-to-remove 1/2))
+  (letrec ([width (puzzle-width p)]
+           [remove-step (λ (p steps)
+                          (if (= steps 0)
+                              p
+                              (let ([rand-pos (make-pos (random width) (random width))])
+                                (if (= (puzzle-ref p rand-pos) 0)
+                                    (remove-step p steps)
+                                    (remove-step (tile-function (λ (pos) (if (pos=? pos rand-pos)
+                                                                             0
+                                                                             (puzzle-ref p pos)))) width)))))])
+    (remove-step p (floor (* (square width) part-to-remove)))))
