@@ -9,12 +9,14 @@
 (define thick-pen (send the-pen-list find-or-create-pen "black" 3 'solid))
 (define thin-pen (send the-pen-list find-or-create-pen "black" 1 'solid))
 (define large-font (send the-font-list find-or-create-font 20 'default 'normal 'normal))
-(define small-font (send the-font-list find-or-create-font 8 'default 'normal 'normal))
+(define small-font (send the-font-list find-or-create-font 10 'default 'normal 'normal))
 
-(define frame-size 800)
 (define n 3)
 (define width (square n))
+(define frame-size (* 100 width))
 (define square-size (/ frame-size width))
+
+(define click-rects empty)
 
 (define puzzle (puzzle-unsolve (make-puzzle n)))
 
@@ -39,19 +41,34 @@
 (define (draw-tile x y)
   (let* ([bitmap (make-object bitmap% (ceiling square-size) (ceiling square-size))]
          [dc (send bitmap make-dc)]
-         [value (puzzle-ref puzzle (make-pos x y))]
-         [text (format "~a" value)])
-    (let*-values ([(text-width text-height descender ascender) (send dc get-text-extent text)]
-                  [(text-x) (- (/ square-size 2) (/ text-width 2))]
-                  [(text-y) (- (/ square-size 2) (/ text-height 2))])
-      (send dc set-font large-font)
-      (send dc draw-text text text-x text-y)
-      (draw-frame dc x y))
+         [value (puzzle-ref puzzle (make-pos x y))])
+    (draw-frame dc x y)
+    (if (= value 0)
+        (begin
+          (send dc set-font small-font)
+          (for* ([i n][j n])
+            (let*-values ([(value) (+ 1 i (* j n))]
+                          [(text) (format "~a" value)]
+                          [(text-width text-height descender ascender) (send dc get-text-extent text)]
+                          [(text-x) (- (* (1+ i) (/ square-size (1+ n))) (/ text-width 2))]
+                          [(text-y) (- (* (1+ j) (/ square-size (1+ n))) (/ text-height 2))])
+            (send dc draw-text text text-x text-y))))
+        (let*-values ([(text) (format "~a" value)]
+                      [(text-width text-height descender ascender) (send dc get-text-extent text)]
+                      [(text-x) (- (/ square-size 2) text-width)]
+                      [(text-y) (- (/ square-size 2) text-height)])
+          (send dc set-font large-font)
+          (send dc draw-text text text-x text-y)))
     bitmap))
 
 (define (draw-values dc)
+  (set! click-rects empty)
   (for* ([x width][y width])
-    (send dc draw-bitmap (draw-tile x y) (* x square-size) (* y square-size))))
+    (send dc
+          draw-bitmap
+          (draw-tile x y)
+          (+ (/ (send thick-pen get-width) 2) (* x square-size))
+          (+ (/ (send thick-pen get-width) 2) (* y square-size)))))
 
 (define sudoku-canvas% (let ([last-event-type ""])
                          (class canvas%
