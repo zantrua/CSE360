@@ -3,6 +3,7 @@
 (require (file "puzzle.rkt")
          (file "utility.rkt")
          (file "position.rkt")
+         (file "rectangle.rkt")
          racket/gui)
 
 
@@ -38,6 +39,14 @@
   (send dc set-pen (get-pen (1+ y)))
   (send dc draw-line 0 square-size square-size square-size))
 
+(define (set-puzzle-tile! x y value)
+  (write (format "set ~a, ~a to ~a" x y value)))
+
+(define (click-function-small value x y)
+  (λ (click-type) (if (eq? click-type 'left-down)
+                      (set-puzzle-tile! x y value)
+                      (void))))
+
 (define (draw-tile x y)
   (let* ([bitmap (make-object bitmap% (ceiling square-size) (ceiling square-size))]
          [dc (send bitmap make-dc)]
@@ -51,8 +60,11 @@
                           [(text) (format "~a" value)]
                           [(text-width text-height descender ascender) (send dc get-text-extent text)]
                           [(text-x) (- (* (1+ i) (/ square-size (1+ n))) (/ text-width 2))]
-                          [(text-y) (- (* (1+ j) (/ square-size (1+ n))) (/ text-height 2))])
-            (send dc draw-text text text-x text-y))))
+                          [(text-y) (- (* (1+ j) (/ square-size (1+ n))) (/ text-height 2))]
+                          [(rect) (cons (click-function-small value x y) (make-rectangle (make-pos text-x text-y)
+                                                                                         (make-pos (+ text-x text-width) (+ text-y text-height))))])
+              (set! click-rects (cons rect click-rects))
+              (send dc draw-text text text-x text-y))))
         (let*-values ([(text) (format "~a" value)]
                       [(text-width text-height descender ascender) (send dc get-text-extent text)]
                       [(text-x) (- (/ square-size 2) text-width)]
