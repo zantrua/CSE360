@@ -45,6 +45,12 @@
                              (send canvas refresh))
                       (void))))
 
+(define (click-function-large x y)
+  (λ (click-type) (if (eq? click-type 'left-down)
+                      (begin (set! puzzle (replace-puzzle-tile puzzle (make-pos x y) 0))
+                             (send canvas refresh))
+                      (void))))
+
 (define (draw-tile x y)
   (let* ([bitmap (make-object bitmap% (ceiling square-size) (ceiling square-size))]
          [dc (send bitmap make-dc)]
@@ -64,11 +70,17 @@
                                                                                          (make-pos (+ (* x square-size) text-x text-width)
                                                                                                    (+ (* y square-size) text-y text-height))))])
               (set! click-rects (cons rect click-rects))
+              (send dc set-font small-font)
               (send dc draw-text text text-x text-y))))
         (let*-values ([(text) (format "~a" value)]
                       [(text-width text-height descender ascender) (send dc get-text-extent text)]
                       [(text-x) (- (/ square-size 2) text-width)]
-                      [(text-y) (- (/ square-size 2) text-height)])
+                      [(text-y) (- (/ square-size 2) text-height)]
+                      [(rect) (cons (click-function-large x y) (make-rectangle (make-pos (+ (* x square-size) text-x)
+                                                                                         (+ (* y square-size) text-y))
+                                                                               (make-pos (+ (* x square-size) text-x text-width)
+                                                                                         (+ (* y square-size) text-y text-height))))])
+          (set! click-rects (cons rect click-rects))
           (send dc set-font large-font)
           (send dc draw-text text text-x text-y)))
     bitmap))
