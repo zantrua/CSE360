@@ -61,9 +61,11 @@
                           [(text-width text-height descender ascender) (send dc get-text-extent text)]
                           [(text-x) (- (* (1+ i) (/ square-size (1+ n))) (/ text-width 2))]
                           [(text-y) (- (* (1+ j) (/ square-size (1+ n))) (/ text-height 2))]
-                          [(rect) (cons (click-function-small value x y) (make-rectangle (make-pos text-x text-y)
-                                                                                         (make-pos (+ text-x text-width) (+ text-y text-height))))])
-              ;(set! click-rects (cons rect click-rects))
+                          [(rect) (cons (click-function-small value x y) (make-rectangle (make-pos (+ (* x square-size) text-x)
+                                                                                                   (+ (* y square-size) text-y))
+                                                                                         (make-pos (+ (* x square-size) text-x text-width)
+                                                                                                   (+ (* y square-size) text-y text-height))))])
+              (set! click-rects (cons rect click-rects))
               (send dc draw-text text text-x text-y))))
         (let*-values ([(text) (format "~a" value)]
                       [(text-width text-height descender ascender) (send dc get-text-extent text)]
@@ -74,7 +76,7 @@
     bitmap))
 
 (define (draw-values dc)
-  (set! click-rects (cons (cons (λ (click-type) (display "Asfd")) (make-rectangle (make-pos 0 0) (make-pos frame-size frame-size))) empty))
+  (set! click-rects empty)
   (for* ([x width][y width])
     (send dc
           draw-bitmap
@@ -92,7 +94,6 @@
                                (if (or (eq? event-type 'left-down)
                                        (eq? event-type 'right-down))
                                    (let ([click-rect (findf (λ (rect) (rectangle-contains? (cdr rect) mouse-pos)) click-rects)])
-                                     (display click-rects)
                                      (if click-rect
                                          ((car click-rect) event-type)
                                          (void)))
