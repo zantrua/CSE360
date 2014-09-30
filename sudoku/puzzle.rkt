@@ -4,7 +4,7 @@
          (file "position.rkt")
          (file "partial-puzzle.rkt"))
 
-(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref puzzle-print puzzle-unsolve)
+(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref replace-puzzle-tile puzzle-print puzzle-unsolve)
 
 (define (make-empty-puzzle (n 3))
   (define width (square n))
@@ -66,6 +66,11 @@
 (define (puzzle-ref p pos)
   (let-values ([(x y) (pos-get-values pos)])
     (list-ref (list-ref p y) x)))
+
+(define (replace-puzzle-tile p pos value)
+  (tile-function (λ (pos-test) (if (pos=? pos pos-test)
+                                   value
+                                   (puzzle-ref p pos-test))) (puzzle-width p)))
 
 (define (puzzle-print p)
   (let* ([width (puzzle-width p)]

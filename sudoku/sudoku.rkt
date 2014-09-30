@@ -39,12 +39,10 @@
   (send dc set-pen (get-pen (1+ y)))
   (send dc draw-line 0 square-size square-size square-size))
 
-(define (set-puzzle-tile! x y value)
-  (write (format "set ~a, ~a to ~a" x y value)))
-
 (define (click-function-small value x y)
   (λ (click-type) (if (eq? click-type 'left-down)
-                      (set-puzzle-tile! x y value)
+                      (begin (set! puzzle (replace-puzzle-tile puzzle (make-pos x y) value))
+                             (send canvas refresh))
                       (void))))
 
 (define (draw-tile x y)
