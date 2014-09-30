@@ -63,7 +63,7 @@
                           [(text-y) (- (* (1+ j) (/ square-size (1+ n))) (/ text-height 2))]
                           [(rect) (cons (click-function-small value x y) (make-rectangle (make-pos text-x text-y)
                                                                                          (make-pos (+ text-x text-width) (+ text-y text-height))))])
-              (set! click-rects (cons rect click-rects))
+              ;(set! click-rects (cons rect click-rects))
               (send dc draw-text text text-x text-y))))
         (let*-values ([(text) (format "~a" value)]
                       [(text-width text-height descender ascender) (send dc get-text-extent text)]
@@ -74,7 +74,7 @@
     bitmap))
 
 (define (draw-values dc)
-  (set! click-rects empty)
+  (set! click-rects (cons (cons (λ (click-type) (display "Asfd")) (make-rectangle (make-pos 0 0) (make-pos frame-size frame-size))) empty))
   (for* ([x width][y width])
     (send dc
           draw-bitmap
@@ -85,10 +85,18 @@
 (define sudoku-canvas% (let ([last-event-type ""])
                          (class canvas%
                            (define/override (on-event event)
-                             (let ([event-type (send event get-event-type)]
-                                   [mouse-x (send event get-x)]
-                                   [mouse-y (send event get-y)])
-                               (void)))
+                             (let* ([event-type (send event get-event-type)]
+                                    [mouse-x (send event get-x)]
+                                    [mouse-y (send event get-y)]
+                                    [mouse-pos (make-pos mouse-x mouse-y)])
+                               (if (or (eq? event-type 'left-down)
+                                       (eq? event-type 'right-down))
+                                   (let ([click-rect (findf (λ (rect) (rectangle-contains? (cdr rect) mouse-pos)) click-rects)])
+                                     (display click-rects)
+                                     (if click-rect
+                                         ((car click-rect) event-type)
+                                         (void)))
+                                   (void))))
                            (super-new))))
 
 (define frame
