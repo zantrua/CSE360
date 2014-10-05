@@ -1,15 +1,11 @@
 #lang racket
 
 (require (file "position.rkt"))
-(provide make-rectangle-center-size make-rectangle rectangle-get-corners rectangle-contains?)
+(provide make-rectangle-corner-size make-rectangle rectangle-get-corners rectangle-contains?)
 
-(define (make-rectangle-center-size center size)
-  (let-values ([(center-x center-y) (pos-get-values center)]
-               [(size-x size-y) (pos-get-values size)])
-    (make-rectangle (make-pos (- center-x (/ size-x 2))
-                              (- center-y (/ size-y 2)))
-                    (make-pos (+ center-x (/ size-x 2))
-                              (+ center-y (/ size-y 2))))))
+(define (make-rectangle-corner-size corner size)
+    (make-rectangle corner
+                    (pos+ corner size)))
 
 (define (make-rectangle min max)
   (cons min max))
