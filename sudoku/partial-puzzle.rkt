@@ -34,4 +34,4 @@
   (second (partial-puzzle-ref p pos)))
   
 (define (partial-puzzle->puzzle p)
-  (tile-function (λ (pos) (partial-puzzle-ref-tile p pos)) (partial-puzzle-width p)))
+  (tile-function (λ (pos) (cons (partial-puzzle-ref-tile p pos) #t)) (partial-puzzle-width p)))

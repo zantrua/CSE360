@@ -25,18 +25,18 @@
 (assert (string=? (with-output-port (λ () (pos-print (make-pos 1 2)))) "(1, 2)"))
 
 (define test-board-zero
-  '((0 0 0 0 0 0 0 0 0)
-    (0 0 0 0 0 0 0 0 0)
-    (0 0 0 0 0 0 0 0 0)
-    (0 0 0 0 0 0 0 0 0)
-    (0 0 0 0 0 0 0 0 0)
-    (0 0 0 0 0 0 0 0 0)
-    (0 0 0 0 0 0 0 0 0)
-    (0 0 0 0 0 0 0 0 0)
-    (0 0 0 0 0 0 0 0 0)))
+  '(((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
+    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
+    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
+    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
+    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
+    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
+    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
+    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
+    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))))
 
 (assert (= (puzzle-width test-board-zero) 9))
-(assert (= (puzzle-ref test-board-zero (make-pos 0 0)) 0))
+(assert (= (tile-get-value (puzzle-ref test-board-zero (make-pos 0 0))) 0))
 (assert (equal? test-board-zero (make-empty-puzzle)))
 (assert (not (puzzle-solved? test-board-zero #t)))
 
@@ -51,9 +51,13 @@
     (0 0 0 4 1 9 0 0 5)
     (0 0 0 0 8 0 0 7 9)))
 
+
+(set! test-board-unsolved
+      (tile-function (λ (pos) (cons (puzzle-ref test-board-unsolved pos) #f)) (puzzle-width test-board-unsolved)))
+
 (assert (= (puzzle-width test-board-unsolved) 9))
-(assert (= (puzzle-ref test-board-unsolved (make-pos 0 0)) 5))
-(assert (= (puzzle-ref test-board-unsolved (make-pos 1 0)) 3))
+(assert (= (tile-get-value (puzzle-ref test-board-unsolved (make-pos 0 0))) 5))
+(assert (= (tile-get-value (puzzle-ref test-board-unsolved (make-pos 1 0))) 3))
 (assert (not (puzzle-solved? test-board-unsolved #t)))
 (assert (puzzle-solved? test-board-unsolved))
 
@@ -68,7 +72,11 @@
     (2 8 7 4 1 9 6 3 5)
     (3 4 5 2 8 6 1 7 9)))
 
-(assert (puzzle-solved? test-board-solved ))
+
+(set! test-board-solved
+      (tile-function (λ (pos) (cons (puzzle-ref test-board-solved pos) #f)) (puzzle-width test-board-solved)))
+
+(assert (puzzle-solved? test-board-solved))
 (assert (puzzle-solved? test-board-solved #t))
 
 (define test-board-incorrect
@@ -81,6 +89,9 @@
     (9 6 1 5 3 7 2 8 4)
     (2 8 7 4 1 9 6 3 5)
     (3 4 5 2 8 6 1 7 9)))
+
+(set! test-board-incorrect
+      (tile-function (λ (pos) (cons (puzzle-ref test-board-incorrect pos) #f)) (puzzle-width test-board-incorrect)))
 
 (assert (not (puzzle-solved? test-board-incorrect)))
 (assert (not (puzzle-solved? test-board-incorrect #t)))
@@ -95,6 +106,9 @@
     (9 6 1 5 3 7 2 8 4)
     (2 8 7 4 1 9 6 3 5)
     (3 4 5 2 8 6 1 7 9)))
+
+(set! test-board-incorrect-2
+      (tile-function (λ (pos) (cons (puzzle-ref test-board-incorrect-2 pos) #f)) (puzzle-width test-board-incorrect-2)))
 
 (assert (not (puzzle-solved? test-board-incorrect-2 #t)))
 (assert (not (puzzle-solved? test-board-incorrect-2)))

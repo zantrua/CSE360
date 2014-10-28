@@ -4,12 +4,25 @@
          (file "position.rkt")
          (file "partial-puzzle.rkt"))
 
-(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref replace-puzzle-tile puzzle-print puzzle-unsolve)
+(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref replace-puzzle-tile puzzle-print puzzle-unsolve
+         tile-get-value tile-get-locked)
 
+; A tile needs to know what value is in it currently and if it's allowed to change
+(define (make-empty-tile)
+  (cons 0 #f))
+
+(define (tile-get-value tile)
+  (car tile))
+
+(define (tile-get-locked tile)
+  (cdr tile))
+
+; Makes an empty puzzle by filling the grid with empty tiles
 (define (make-empty-puzzle (n 3))
   (define width (square n))
-  (tile-function (λ (pos) 0) width))
+  (tile-function (λ (pos) (make-empty-tile)) width))
 
+; Makes a puzzle using a recursive backtracking algorithm
 (define (make-puzzle (n 3))
   (letrec ([width (square n)]
            [step  (λ (p pos)
@@ -39,7 +52,7 @@
          [check-set (λ (p proc)
                       (let* ([get-cell (λ (pos)
                                          (if (proc pos)
-                                             (puzzle-ref p pos)
+                                             (tile-get-value (puzzle-ref p pos))
                                              #f))]
                              [set (filter-map get-cell (cartesian-product (range width) (range width)))])
                         (if exact
