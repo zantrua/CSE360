@@ -116,4 +116,7 @@
 (for ([i 10])
   (assert (puzzle-solved? (make-puzzle) #t)))
 
+(for ([i 10])
+  (assert (puzzle-solved? (puzzle-unsolve (make-puzzle)))))
+
 (display "Tests completed")

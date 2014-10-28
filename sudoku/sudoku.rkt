@@ -41,13 +41,13 @@
 
 (define (click-function-small value x y)
   (λ (click-type) (if (eq? click-type 'left-down)
-                      (begin (set! puzzle (replace-puzzle-tile puzzle (make-pos x y) value))
+                      (begin (set! puzzle (replace-puzzle-tile puzzle (make-pos x y) (make-tile value)))
                              (send canvas refresh))
                       (void))))
 
 (define (click-function-large x y)
   (λ (click-type) (if (eq? click-type 'left-down)
-                      (begin (set! puzzle (replace-puzzle-tile puzzle (make-pos x y) 0))
+                      (begin (set! puzzle (replace-puzzle-tile puzzle (make-pos x y) (make-empty-tile)))
                              (send canvas refresh))
                       (void))))
 

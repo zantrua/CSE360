@@ -5,11 +5,14 @@
          (file "partial-puzzle.rkt"))
 
 (provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref replace-puzzle-tile puzzle-print puzzle-unsolve
-         tile-get-value tile-get-locked)
+         make-tile make-empty-tile tile-get-value tile-get-locked)
 
 ; A tile needs to know what value is in it currently and if it's allowed to change
 (define (make-empty-tile)
-  (cons 0 #f))
+  (make-tile 0))
+
+(define (make-tile value (locked #f))
+  (cons value locked))
 
 (define (tile-get-value tile)
   (car tile))
@@ -102,9 +105,9 @@
                           (if (= steps 0)
                               p
                               (let ([rand-pos (make-pos (random width) (random width))])
-                                (if (= (puzzle-ref p rand-pos) 0)
+                                (if (= (tile-get-value (puzzle-ref p rand-pos)) 0)
                                     (remove-step p steps)
                                     (remove-step (tile-function (λ (pos) (if (pos=? pos rand-pos)
-                                                                             0
+                                                                             (make-empty-tile)
                                                                              (puzzle-ref p pos))) width) (1- steps))))))])
     (remove-step p (floor (* (square width) part-to-remove)))))
