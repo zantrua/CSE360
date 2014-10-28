@@ -46,15 +46,17 @@
                       (void))))
 
 (define (click-function-large x y)
-  (λ (click-type) (if (eq? click-type 'left-down)
-                      (begin (set! puzzle (replace-puzzle-tile puzzle (make-pos x y) (make-empty-tile)))
-                             (send canvas refresh))
-                      (void))))
+  (let ([pos (make-pos x y)])
+    (λ (click-type) (if (and (eq? click-type 'left-down)
+                             (not (tile-get-locked (puzzle-ref puzzle pos))))
+                        (begin (set! puzzle (replace-puzzle-tile puzzle pos (make-empty-tile)))
+                               (send canvas refresh))
+                        (void)))))
 
 (define (draw-tile x y)
   (let* ([bitmap (make-object bitmap% (ceiling square-size) (ceiling square-size))]
          [dc (send bitmap make-dc)]
-         [value (puzzle-ref puzzle (make-pos x y))])
+         [value (tile-get-value (puzzle-ref puzzle (make-pos x y)))])
     (draw-frame dc x y)
     (if (= value 0)
         (begin
