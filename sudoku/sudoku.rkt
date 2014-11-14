@@ -1,39 +1,93 @@
 #lang racket
 
-(require (file "puzzle.rkt")
-         (file "utility.rkt")
-         (file "position.rkt")
-         (file "rectangle.rkt")
+(require (file "game-panel.rkt")
+         (file "login-panel.rkt")
+         
          (file "game-board.rkt")
+         (file "state-machine.rkt")
          racket/gui)
 
-(define n 3)
-(define width (square n))
-(define frame-size (* 100 width))
-(define square-size (/ frame-size width))
+(define game-state (make-state-machine (list (make-transition 'begin 'begin 'login-screen)
+                                             
+                                             (make-transition 'login-screen 'new-user 'new-user-screen)
+                                             (make-transition 'login-screen 'valid-login 'menu-screen)
+                                             (make-transition 'login-screen 'invalid-login 'invalid-login-screen)
+                                             
+                                             (make-transition 'invalid-login-screen 'okay-button 'login-screen)
+                                             
+                                             (make-transition 'new-user-screen 'new-user-made 'menu-screen)
+                                             
+                                             (make-transition 'menu-screen 'about-button 'about-screen)
+                                             
+                                             (make-transition 'about-screen 'back-button 'menu-screen)
+                                             
+                                             (make-transition 'menu-screen 'new-game-button 'game-screen)
+                                             
+                                             (make-transition 'game-screen 'game-menu-button 'save-or-menu-screen)
+                                             (make-transition 'game-screen 'game-save-button 'save-screen))))
 
-(define puzzle (puzzle-unsolve (make-puzzle n)))
+(define (handle-event event)
+  (set! game-state (state-machine-get-next game-state event))
+  (set-game-state (state-machine-get-state game-state)))
 
-(define sudoku-canvas% (class canvas%
-                         (define/override (on-event event)
-                           (let* ([event-type (send event get-event-type)]
-                                  [mouse-x (send event get-x)]
-                                  [mouse-y (send event get-y)]
-                                  [mouse-pos (make-pos mouse-x mouse-y)])
-                             (if (eq? event-type 'left-down)
-                                 (set! puzzle (handle-click puzzle mouse-pos))
-                                 (void))
-                             (send canvas refresh)))
-                         (super-new)))
+; Top level window
 
-(define frame
+(define (make-frame frame-size)
   (new frame%
        [label "Sudoku"]
-       [min-width (+ (get-border-size) frame-size)]
-       [min-height (+ (get-border-size) frame-size)]))
+       [min-width (+ frame-size (get-border-size))]
+       [min-height (+ frame-size (get-border-size))]
+       [stretchable-width #f]
+       [stretchable-height #f]))
 
-(define canvas (new sudoku-canvas%
-                    [parent frame]
-                    [paint-callback (λ (canvas dc) (draw-puzzle puzzle dc))]))
+(define (init-frame frame game-panel)
+  (let-values ([(frame-sx frame-sy) (send frame get-size)]
+               [(game-sx game-sy) (send game-panel get-size)])
+    (send frame min-width (+ frame-sx game-sx))
+    (send frame min-height (+ frame-sy game-sy))))
 
+(define (make-master-panel frame)
+  (new panel%
+       [parent frame]))
+
+(define (make-new-user-panel master-panel handle-event)
+  (new panel%
+         [parent master-panel]))
+
+(define (make-menu-panel master-panel handle-event)
+  (let* ([menu-panel (new vertical-panel%
+                          [parent master-panel])]
+         [menu-new-game-button (new button%
+                                    [parent menu-panel]
+                                    [label "New Game"]
+                                    [callback (λ (button event) (handle-event 'new-game-button))])])
+    menu-panel))
+
+(define frame-size 512)
+(define frame (make-frame frame-size))
+(define master-panel (make-master-panel frame))
+
+(define login-panel (make-login-panel master-panel handle-event))
+(define new-user-panel (make-new-user-panel master-panel handle-event))
+(define menu-panel (make-menu-panel master-panel handle-event))
+(define game-panel (make-game-panel master-panel handle-event))
+
+(init-frame frame game-panel)
+
+(define (clear-panels)
+  (send login-panel show #f)
+  (send new-user-panel show #f)
+  (send menu-panel show #f)
+  (send game-panel show #f))
+
+(define (set-game-state state)
+  (clear-panels)
+  (display (format "~a\n" state))
+  (case state
+    [(login-screen) (send login-panel show #t)]
+    [(new-user-screen) (send new-user-panel show #t)]
+    [(menu-screen) (send menu-panel show #t)]
+    [(game-screen) (send game-panel show #t)]))
+
+(handle-event 'begin)
 (send frame show #t)

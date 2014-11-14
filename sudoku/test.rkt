@@ -1,7 +1,8 @@
 #lang racket
 
 (require (file "puzzle.rkt")
-         (file "position.rkt"))
+         (file "position.rkt")
+         (file "state-machine.rkt"))
 
 (define (assert x)
   (if x (void) (error "Tests failed")))
@@ -118,5 +119,11 @@
 
 (for ([i 10])
   (assert (puzzle-solved? (puzzle-unsolve (make-puzzle)))))
+
+(define sm (make-state-machine (list (make-transition 'a 'flip 'b)
+                                     (make-transition 'b 'flip 'a))))
+
+(assert (eq? (state-machine-get-state sm) 'a))
+(assert (eq? (state-machine-get-state (state-machine-get-next sm 'flip)) 'b))
 
 (display "Tests completed")

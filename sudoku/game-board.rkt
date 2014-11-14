@@ -43,7 +43,8 @@
 (define (draw-tile puzzle square-size x y)
   (let* ([bitmap (make-object bitmap% (ceiling square-size) (ceiling square-size))]
          [dc (send bitmap make-dc)]
-         [value (tile-get-value (puzzle-ref puzzle (make-pos x y)))]
+         [pos (make-pos x y)]
+         [value (tile-get-value (puzzle-ref puzzle pos))]
          [n (sqrt (puzzle-width puzzle))])
     (draw-frame puzzle dc x y)
     (if (= value 0)
@@ -59,6 +60,7 @@
                                                                                                                       (+ (* y square-size) text-y))
                                                                                                             (make-pos text-width
                                                                                                                       text-height)))])
+              ; (send dc set-text-foreground (make-object color% 0 0 255))
               (set! click-rects (cons rect click-rects))
               (send dc draw-text text text-x text-y))))
         (begin
@@ -72,6 +74,10 @@
                                                                                                     (make-pos text-width
                                                                                                               text-height)))])
             (set! click-rects (cons rect click-rects))
+            (send dc set-text-foreground
+                  (if (tile-get-locked (puzzle-ref puzzle pos))
+                      (make-object color%)
+                      (make-object color% 0 0 255)))
             (send dc draw-text text text-x text-y))))
     bitmap))
 
@@ -90,21 +96,23 @@
 ; Click handling functions
 (define (click-function-small puzzle value x y)
   (let ([pos (make-pos x y)])
-    (λ () (replace-puzzle-tile puzzle
-                               pos
-                               (make-tile value)))))
-
+    (λ (click-type) (if (eq? click-type 'left-down)
+                        (replace-puzzle-tile puzzle
+                                             pos
+                                             (make-tile value))
+                        puzzle))))
+  
 (define (click-function-large puzzle x y)
   (let ([pos (make-pos x y)])
-    (λ () (replace-puzzle-tile puzzle
+    (λ (click-type) (replace-puzzle-tile puzzle
                                pos
                                (make-tile (if (not (tile-get-locked (puzzle-ref puzzle pos)))
                                               0
                                               (tile-get-value (puzzle-ref puzzle pos))))))))
 
-(define (handle-click puzzle pos)
-  (let ([click-rect (findf (λ (rect) (rectangle-contains? (cdr rect) pos)) click-rects)])
-    (display click-rect)
-    (if click-rect
-        ((car click-rect))
-        puzzle)))
+(define (handle-click puzzle pos click-type)
+  (let* ([click-rect (findf (λ (rect) (rectangle-contains? (cdr rect) pos)) click-rects)]
+         [new-puzzle (if click-rect
+                         ((car click-rect) click-type)
+                         puzzle)])
+    new-puzzle))
