@@ -4,6 +4,7 @@
          (file "utility.rkt")
          (file "position.rkt")
          (file "rectangle.rkt")
+         (file "tile.rkt")
          racket/gui)
 
 (provide draw-puzzle handle-click get-border-size)
@@ -104,11 +105,10 @@
   
 (define (click-function-large puzzle x y)
   (let ([pos (make-pos x y)])
-    (λ (click-type) (replace-puzzle-tile puzzle
-                               pos
-                               (make-tile (if (not (tile-get-locked (puzzle-ref puzzle pos)))
-                                              0
-                                              (tile-get-value (puzzle-ref puzzle pos))))))))
+    (λ (click-type)
+      (if (tile-get-locked (puzzle-ref puzzle pos))
+          puzzle
+          (replace-puzzle-tile puzzle pos (make-empty-tile))))))
 
 (define (handle-click puzzle pos click-type)
   (let* ([click-rect (findf (λ (rect) (rectangle-contains? (cdr rect) pos)) click-rects)]

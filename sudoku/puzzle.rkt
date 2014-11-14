@@ -2,23 +2,10 @@
 
 (require (file "utility.rkt")
          (file "position.rkt")
-         (file "partial-puzzle.rkt"))
+         (file "partial-puzzle.rkt")
+         (file "tile.rkt"))
 
-(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref replace-puzzle-tile puzzle-print puzzle-unsolve
-         make-tile make-empty-tile tile-get-value tile-get-locked)
-
-; A tile needs to know what value is in it currently and if it's allowed to change
-(define (make-empty-tile)
-  (make-tile 0))
-
-(define (make-tile value (locked #f))
-  (cons value locked))
-
-(define (tile-get-value tile)
-  (car tile))
-
-(define (tile-get-locked tile)
-  (cdr tile))
+(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref replace-puzzle-tile puzzle-print puzzle-unsolve)
 
 ; Makes an empty puzzle by filling the grid with empty tiles
 (define (make-empty-puzzle (n 3))

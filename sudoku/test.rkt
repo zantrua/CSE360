@@ -2,7 +2,8 @@
 
 (require (file "puzzle.rkt")
          (file "position.rkt")
-         (file "state-machine.rkt"))
+         (file "state-machine.rkt")
+         (file "tile.rkt"))
 
 (define (assert x)
   (if x (void) (error "Tests failed")))
@@ -26,15 +27,15 @@
 (assert (string=? (with-output-port (λ () (pos-print (make-pos 1 2)))) "(1, 2)"))
 
 (define test-board-zero
-  '(((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
-    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
-    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
-    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
-    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
-    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
-    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
-    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))
-    ((0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f) (0 . #f))))
+  '(((0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()))
+    ((0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()))
+    ((0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()))
+    ((0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()))
+    ((0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()))
+    ((0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()))
+    ((0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()))
+    ((0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()))
+    ((0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()) (0 #f ()))))
 
 (assert (= (puzzle-width test-board-zero) 9))
 (assert (= (tile-get-value (puzzle-ref test-board-zero (make-pos 0 0))) 0))
@@ -54,7 +55,7 @@
 
 
 (set! test-board-unsolved
-      (tile-function (λ (pos) (cons (puzzle-ref test-board-unsolved pos) #f)) (puzzle-width test-board-unsolved)))
+      (tile-function (λ (pos) (make-tile (puzzle-ref test-board-unsolved pos) #f)) (puzzle-width test-board-unsolved)))
 
 (assert (= (puzzle-width test-board-unsolved) 9))
 (assert (= (tile-get-value (puzzle-ref test-board-unsolved (make-pos 0 0))) 5))
@@ -75,7 +76,7 @@
 
 
 (set! test-board-solved
-      (tile-function (λ (pos) (cons (puzzle-ref test-board-solved pos) #f)) (puzzle-width test-board-solved)))
+      (tile-function (λ (pos) (make-tile (puzzle-ref test-board-solved pos) #f)) (puzzle-width test-board-solved)))
 
 (assert (puzzle-solved? test-board-solved))
 (assert (puzzle-solved? test-board-solved #t))
@@ -92,7 +93,7 @@
     (3 4 5 2 8 6 1 7 9)))
 
 (set! test-board-incorrect
-      (tile-function (λ (pos) (cons (puzzle-ref test-board-incorrect pos) #f)) (puzzle-width test-board-incorrect)))
+      (tile-function (λ (pos) (make-tile (puzzle-ref test-board-incorrect pos) #f)) (puzzle-width test-board-incorrect)))
 
 (assert (not (puzzle-solved? test-board-incorrect)))
 (assert (not (puzzle-solved? test-board-incorrect #t)))
@@ -109,7 +110,7 @@
     (3 4 5 2 8 6 1 7 9)))
 
 (set! test-board-incorrect-2
-      (tile-function (λ (pos) (cons (puzzle-ref test-board-incorrect-2 pos) #f)) (puzzle-width test-board-incorrect-2)))
+      (tile-function (λ (pos) (make-tile (puzzle-ref test-board-incorrect-2 pos) #f)) (puzzle-width test-board-incorrect-2)))
 
 (assert (not (puzzle-solved? test-board-incorrect-2 #t)))
 (assert (not (puzzle-solved? test-board-incorrect-2)))

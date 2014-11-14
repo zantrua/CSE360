@@ -2,12 +2,15 @@
 
 (require racket/gui)
 
-(provide make-login-panel)
+(provide make-invalid-login-panel)
 
-(define (make-login-panel check-login master-panel handle-event)
+(define (make-invalid-login-panel check-login master-panel handle-event)
   (let* ([login-panel (new vertical-panel%
                            [parent master-panel]
                            [alignment '(center center)])]
+         [invalid-login-msg (new message%
+                                 [parent login-panel]
+                                 [label "Incorrect login"])]
          [login-name (new text-field%
                           [parent login-panel]
                           [label "Username"]
@@ -29,6 +32,5 @@
                                                     (handle-event 'invalid-login))))])]
          [login-new-user-button (new button%
                                      [parent login-panel]
-                                     [label "New User"]
-                                     [callback (λ (button event) (handle-event 'new-user-button))])])
+                                     [label "New User"])])
     login-panel))

@@ -1,7 +1,9 @@
 #lang racket
 
 (require (file "utility.rkt")
-         (file "position.rkt"))
+         (file "position.rkt")
+         (file "tile.rkt"))
+
 (provide make-partial-puzzle
          make-partial-puzzle-tile
          partial-puzzle-width
@@ -34,4 +36,4 @@
   (second (partial-puzzle-ref p pos)))
   
 (define (partial-puzzle->puzzle p)
-  (tile-function (λ (pos) (cons (partial-puzzle-ref-tile p pos) #t)) (partial-puzzle-width p)))
+  (tile-function (λ (pos) (make-tile (partial-puzzle-ref-tile p pos) #t)) (partial-puzzle-width p)))
