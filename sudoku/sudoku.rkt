@@ -13,6 +13,7 @@
          (file "save-file.rkt")
          
          (planet vyzo/crypto:2:3)
+         (only-in file/sha1 bytes->hex-string)
          racket/gui)
 
 ; UI control state machine
@@ -23,7 +24,9 @@
                                              (make-transition 'login-screen 'valid-login 'menu-screen)
                                              (make-transition 'login-screen 'invalid-login 'invalid-login-screen)
                                              
-                                             (make-transition 'invalid-login-screen 'okay-button 'login-screen)
+                                             (make-transition 'invalid-login-screen 'new-user-button 'new-user-screen)
+                                             (make-transition 'invalid-login-screen 'valid-login 'menu-screen)
+                                             (make-transition 'invalid-login-screen 'invalid-login 'invalid-login-screen)
                                              
                                              (make-transition 'new-user-screen 'make-user-worked 'menu-screen)
                                              (make-transition 'new-user-screen 'make-user-failed 'new-user-screen)
@@ -62,7 +65,7 @@
 ; Login system
 
 (define (password-hash pass)
-  "")
+  (bytes->hex-string (sha256 (string->bytes/utf-8 pass))))
 
 (define (make-login name pass)
   #t)
@@ -71,7 +74,8 @@
   (let* ([save-value (file->value save-file-path)]
          [matches (filter (λ (x) (eq? (save-file-user-get-name x) name)) save-value)]
          [pass-hash (password-hash pass)])
-    (eq? (first matches) pass-hash)))
+    (and (not (empty? matches))
+         (eq? (first matches) pass-hash))))
 
 ; Top level window
 

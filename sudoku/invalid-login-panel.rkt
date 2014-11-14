@@ -32,5 +32,6 @@
                                                     (handle-event 'invalid-login))))])]
          [login-new-user-button (new button%
                                      [parent login-panel]
-                                     [label "New User"])])
+                                     [label "New User"]
+                                     [callback (λ (button event) (handle-event 'new-user-button))])])
     login-panel))
