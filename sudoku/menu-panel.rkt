@@ -5,18 +5,18 @@
 (provide make-menu-panel)
 
 (define (make-menu-panel master-panel handle-event)
-  (let* ([menu-panel (new vertical-panel%
+  (let* ([panel (new vertical-panel%
                           [parent master-panel])]
-         [menu-new-game-button (new button%
-                                    [parent menu-panel]
+         [new-game-button (new button%
+                                    [parent panel]
                                     [label "New Game"]
                                     [callback (λ (button event) (handle-event 'new-game-button))])]
-         [menu-about-button (new button%
-                                 [parent menu-panel]
+         [about-button (new button%
+                                 [parent panel]
                                  [label "About"]
                                  [callback (λ (button event) (handle-event 'about-button))])]
-         [menu-logout-button (new button%
-                                 [parent menu-panel]
+         [logout-button (new button%
+                                 [parent panel]
                                  [label "Log out"]
                                  [callback (λ (button event) (handle-event 'logout-button))])])
-    menu-panel))
+    panel))
