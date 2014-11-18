@@ -8,6 +8,7 @@
          (file "about-panel.rkt")
          (file "instructions-panel.rkt")
          (file "options-panel.rkt")
+         (file "save-panel.rkt")
          
          (file "game-board.rkt")
          (file "state-machine.rkt")
