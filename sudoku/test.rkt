@@ -57,6 +57,10 @@
 (set! test-board-unsolved
       (tile-function (λ (pos) (make-tile (puzzle-ref test-board-unsolved pos) #f)) (puzzle-width test-board-unsolved)))
 
+;(let-values ([(yes no) (puzzle-count-correct test-board-unsolved)])
+  ;(assert (= yes 30))
+  ;(assert (= no 0)))
+
 (assert (= (puzzle-width test-board-unsolved) 9))
 (assert (= (tile-get-value (puzzle-ref test-board-unsolved (make-pos 0 0))) 5))
 (assert (= (tile-get-value (puzzle-ref test-board-unsolved (make-pos 1 0))) 3))

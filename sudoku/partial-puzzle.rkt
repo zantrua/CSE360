@@ -10,13 +10,15 @@
          partial-puzzle-ref
          partial-puzzle-ref-tile
          partial-puzzle-ref-numbers
-         partial-puzzle->puzzle)
+         partial-puzzle->puzzle
+         partial-puzzle-ref-locked
+         puzzle->partial-puzzle)
 
 (define (make-partial-puzzle-tile (n 3) (tile 0) (numbers (void)))
     (if (void? numbers)
         (let ([width (square n)])
-          (list tile (build-list width (λ (n) (1+ n)))))
-        (list tile numbers)))
+          (list tile (build-list width (λ (n) (1+ n))) #f))
+        (list tile numbers #f)))
 
 (define (make-partial-puzzle (n 3))
   (let ([width (square n)])
@@ -35,5 +37,11 @@
 (define (partial-puzzle-ref-numbers p pos)
   (second (partial-puzzle-ref p pos)))
   
+(define (partial-puzzle-ref-locked p pos)
+  (third (partial-puzzle-ref p pos)))
+
 (define (partial-puzzle->puzzle p)
   (tile-function (λ (pos) (make-tile (partial-puzzle-ref-tile p pos) #t)) (partial-puzzle-width p)))
+
+(define (puzzle->partial-puzzle p)
+  (void))

@@ -15,6 +15,10 @@
                                  [parent panel]
                                  [label "About"]
                                  [callback (λ (button event) (handle-event 'about-button))])]
+         [instructions-button (new button%
+                                   [parent panel]
+                                   [label "Instructions"]
+                                   [callback (λ (button event) (handle-event 'instructions-button))])]
          [logout-button (new button%
                                  [parent panel]
                                  [label "Log out"]

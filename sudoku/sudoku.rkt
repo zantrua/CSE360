@@ -7,6 +7,7 @@
          (file "new-user-panel.rkt")
          (file "about-panel.rkt")
          (file "instructions-panel.rkt")
+         (file "options-panel.rkt")
          
          (file "game-board.rkt")
          (file "state-machine.rkt")
@@ -32,10 +33,15 @@
                                              (make-transition 'new-user-screen 'make-user-failed 'new-user-screen)
                                              
                                              (make-transition 'menu-screen 'about-button 'about-screen)
-                                             (make-transition 'menu-screen 'new-game-button 'game-screen)
+                                             (make-transition 'menu-screen 'new-game-button 'options-screen)
+                                             (make-transition 'menu-screen 'instructions-button 'instructions-screen)
                                              (make-transition 'menu-screen 'logout-button 'login-screen)
                                              
                                              (make-transition 'about-screen 'menu-button 'menu-screen)
+                                             
+                                             (make-transition 'instructions-screen 'menu-button 'menu-screen)
+                                             
+                                             (make-transition 'options-screen 'start-game-button 'game-screen)
                                              
                                              (make-transition 'game-screen 'game-menu-button 'menu-screen)
                                              (make-transition 'game-screen 'game-save-button 'save-screen))))
@@ -53,7 +59,9 @@
     [(menu-screen) (send menu-panel show #t)]
     [(game-screen) (send game-panel show #t)]
     [(about-screen) (send about-panel show #t)]
-    [(invalid-login-screen) (send invalid-login-panel show #t)]))
+    [(invalid-login-screen) (send invalid-login-panel show #t)]
+    [(options-screen) (send options-panel show #t)]
+    [(instructions-screen) (send instructions-panel show #t)]))
 
 ; Save system
 
@@ -68,14 +76,21 @@
   (bytes->hex-string (sha256 (string->bytes/utf-8 pass))))
 
 (define (make-login name pass)
-  #t)
-
-(define (check-login name pass)
   (let* ([save-value (file->value save-file-path)]
          [matches (filter (λ (x) (eq? (save-file-user-get-name x) name)) save-value)]
          [pass-hash (password-hash pass)])
+    (if (empty? matches)
+        (begin (with-output-to-file save-file-path (λ () (display (cons (make-save-file-user name pass-hash '()) save-value))) #:exists 'replace)
+               #t)
+        #f)))
+
+(define (check-login name pass)
+  (let* ([save-value (file->value save-file-path)]
+         [matches (filter (λ (x) (string=? (symbol->string (save-file-user-get-name x)) name)) save-value)]
+         [pass-hash (password-hash pass)])
+    (display (save-file-user-get-pass-hash (first matches)))
     (and (not (empty? matches))
-         (eq? (first matches) pass-hash))))
+         (string=? (symbol->string (save-file-user-get-pass-hash (first matches))) pass-hash))))
 
 ; Top level window
 
@@ -110,6 +125,7 @@
 (define game-panel (make-game-panel master-panel handle-event))
 (define invalid-login-panel (make-invalid-login-panel check-login master-panel handle-event))
 (define instructions-panel (make-instructions-panel master-panel handle-event))
+(define options-panel (make-options-panel set-options master-panel handle-event))
 
 (init-frame frame game-panel)
 
@@ -119,7 +135,9 @@
   (send menu-panel show #f)
   (send about-panel show #f)
   (send game-panel show #f)
-  (send invalid-login-panel show #f))
+  (send invalid-login-panel show #f)
+  (send instructions-panel show #f)
+  (send options-panel show #f))
 
 (handle-event 'begin)
 (send frame show #t)

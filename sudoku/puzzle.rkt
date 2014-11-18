@@ -5,7 +5,7 @@
          (file "partial-puzzle.rkt")
          (file "tile.rkt"))
 
-(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref replace-puzzle-tile puzzle-print puzzle-unsolve)
+(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref replace-puzzle-tile puzzle-print puzzle-unsolve puzzle-count-correct)
 
 ; Makes an empty puzzle by filling the grid with empty tiles
 (define (make-empty-puzzle (n 3))
@@ -13,8 +13,9 @@
   (tile-function (λ (pos) (make-empty-tile)) width))
 
 ; Makes a puzzle using a recursive backtracking algorithm
-(define (make-puzzle (n 3))
-  (letrec ([width (square n)]
+(define (solve-puzzle part-puzz)
+  (letrec ([width (partial-puzzle-width part-puzz)]
+           [n (sqrt width)]
            [step  (λ (p pos)
                     (if (not pos)
                         (partial-puzzle->puzzle p)
@@ -29,16 +30,30 @@
                                                                                     [idx (random (length lst))]
                                                                                     [val (list-ref lst idx)])
                                                                                (make-partial-puzzle-tile n val (remove-index lst idx))))))])
-                          (if (empty? (partial-puzzle-ref-numbers p pos))
-                              (step (reset-tile p) (pos-backward pos width))
-                              (let ([p (set-tile p)])
-                                (if (puzzle-solved? (partial-puzzle->puzzle p))
-                                    (step p (pos-forward pos width))
-                                    (step (clear-tile p) pos)))))))])
-    (step (make-partial-puzzle n) (make-pos 0 0))))
+                          (if (partial-puzzle-ref-locked p pos)
+                              (step p (pos-forward pos width))
+                              (if (empty? (partial-puzzle-ref-numbers p pos))
+                                  (step (reset-tile p) (pos-backward pos width))
+                                  (let ([p (set-tile p)])
+                                    (if (puzzle-solved? (partial-puzzle->puzzle p))
+                                        (step p (pos-forward pos width))
+                                        (step (clear-tile p) pos))))))))])
+    (step part-puzz (make-pos 0 0))))
+
+(define (make-puzzle (n 3))
+    (solve-puzzle (make-partial-puzzle n)))
 
 (define (puzzle-solved? p (exact #f))
   (let* ([width (puzzle-width p)]
+         [in-square? (λ (pos n)
+                       (let* ([sqrt-width (sqrt width)]
+                              [square-x (modulo n 3)]
+                              [square-y (quotient n 3)]
+                              [start-x (* sqrt-width square-x)]
+                              [start-y (* sqrt-width square-y)])
+                         (let-values ([(x y) (pos-get-values pos)])
+                           (and (member x (range start-x (+ start-x sqrt-width)))
+                                (member y (range start-y (+ start-y sqrt-width)))))))]
          [check-set (λ (p proc)
                       (let* ([get-cell (λ (pos)
                                          (if (proc pos)
@@ -48,16 +63,7 @@
                         (if exact
                             (set=? (list->set set) (list->set (range 1 (1+ width))))
                             (= (length set) (length (remove-duplicates set (λ (a b) (and (= a b)
-                                                                                         (not (= a 0))))))))))]
-         [in-square? (λ (pos n)
-                       (let* ([sqrt-width (sqrt width)]
-                              [square-x (modulo n 3)]
-                              [square-y (quotient n 3)]
-                              [start-x (* sqrt-width square-x)]
-                              [start-y (* sqrt-width square-y)])
-                         (let-values ([(x y) (pos-get-values pos)])
-                           (and (member x (range start-x (+ start-x sqrt-width)))
-                                (member y (range start-y (+ start-y sqrt-width)))))))])
+                                                                                         (not (= a 0))))))))))])
     (andmap (λ (proc) (check-set p proc))
             (append (map (λ (n) (λ (pos) (= (pos-get-x pos) n))) (range width))
                     (map (λ (n) (λ (pos) (= (pos-get-y pos) n))) (range width))
@@ -98,3 +104,9 @@
                                                                              (make-empty-tile)
                                                                              (puzzle-ref p pos))) width) (1- steps))))))])
     (remove-step p (floor (* (square width) part-to-remove)))))
+
+(define (assert x)
+  (if x (void) (error "asdf")))
+
+(define (puzzle-count-correct p)
+  (values 0 0))
