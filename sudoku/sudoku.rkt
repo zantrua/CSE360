@@ -85,13 +85,16 @@
   (bytes->hex-string (sha256 (string->bytes/utf-8 pass))))
 
 (define (make-login name pass)
-  (let* ([save-value (file->value save-file-path)]
-         [matches (filter (λ (x) (string=? (save-file-user-get-name x) name)) save-value)]
-         [pass-hash (password-hash pass)])
-    (if (empty? matches)
-        (begin (with-output-to-file save-file-path (λ () (write (cons (make-save-file-user name pass-hash '()) save-value))) #:exists 'replace)
-               #t)
-        #f)))
+  (if (and (> (string-length name) 0)
+           (> (string-length pass) 0))
+      (let* ([save-value (file->value save-file-path)]
+             [matches (filter (λ (x) (string=? (save-file-user-get-name x) name)) save-value)]
+             [pass-hash (password-hash pass)])
+        (if (empty? matches)
+            (begin (with-output-to-file save-file-path (λ () (write (cons (make-save-file-user name pass-hash '()) save-value))) #:exists 'replace)
+                   #t)
+            #f))
+      #f))
 
 (define (check-login name pass)
   (let* ([save-value (file->value save-file-path)]

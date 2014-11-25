@@ -20,9 +20,10 @@
          [make-user-button (new button%
                                 [parent new-user-panel]
                                 [label "Make user"]
-                                [callback (λ (button event) (let ([user-name (send user-name get-value)]
-                                                                  [password (send password get-value)])
-                                                              (if (make-login user-name password)
-                                                                  (handle-event 'make-user-worked)
-                                                                  (handle-event 'make-user-failed))))])])
+                                [callback (λ (button event)
+                                            (let ([user-name (send user-name get-value)]
+                                                  [password (send password get-value)])
+                                              (if (make-login user-name password)
+                                                  (handle-event 'make-user-worked)
+                                                  (handle-event 'make-user-failed))))])])
     new-user-panel))
