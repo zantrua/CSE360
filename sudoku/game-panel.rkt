@@ -12,12 +12,15 @@
 
 (define (set-options difficulty size)
   (let-values ([(remove-frac avg-time hints) (case difficulty
-                                               [(easy)   (values 0.5 1000 10)]
+                                               [(easy)   (values 0.1 1000 10)]
                                                [(medium) (values 0.6 1200  5)]
                                                [(hard)   (values 0.7 1500  2)]
                                                [(evil)   (values 0.8 2000  0)])])
     (set! puzzle (puzzle-unsolve (make-puzzle size) remove-frac))
-    (set! options (list avg-time hints))))
+    (set! options (list avg-time hints))
+    (set! seconds 0)
+    (set! mistakes 0)
+    (set! hints-used 0)))
 
 (define (get-avg-time)
   (first options))
@@ -26,7 +29,7 @@
   (second options))
 
 (define seconds 0)
-(define correct-cells 0)
+(define mistakes 0)
 (define hints-used 0)
 
 (define (make-game-panel master-panel handle-event)
@@ -42,9 +45,10 @@
                                   [parent game-bar-panel]
                                   [label "Menu"]
                                   [callback (λ (button event) (handle-event 'game-menu-button))])]
-           [score-msg (new message%
+           [time-msg (new message%
                            [parent game-bar-panel]
-                           [label "Score: 0"])]
+                           [label "Time: 0"]
+                           [min-width 200])]
            [sudoku-canvas% (class canvas%
                              (define/override (on-event event) 
                                (let* ([event-type (send event get-event-type)] 
@@ -55,16 +59,16 @@
                                          (eq? event-type 'right-down))
                                      (set! puzzle (handle-click puzzle mouse-pos event-type))
                                      (void))
-                                 (send game-canvas refresh))) 
+                                 (send game-canvas refresh)
+                                 (if (puzzle-solved? puzzle)
+                                     (handle-event 'complete)
+                                     (void))))
                              (super-new))]
            [game-canvas (new sudoku-canvas%
                              [parent game-panel]
                              [paint-callback (λ (canvas dc) (draw-puzzle puzzle dc))])]
-           [calc-score (λ () (* (/ (get-avg-time) seconds)
-                                (- (* correct-cells 100)
-                                   (* hints-used 50))))]
            [timer (new timer%
                        [interval 1000]
                        [notify-callback (λ () (set! seconds (+ 1 seconds))
-                                              (send score-msg set-label (format "Score: ~a" (calc-score))))])])
+                                              (send time-msg set-label (format "Time: ~a" seconds)))])])
     game-panel))

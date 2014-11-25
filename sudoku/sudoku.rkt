@@ -45,7 +45,8 @@
                                              (make-transition 'options-screen 'start-game-button 'game-screen)
                                              
                                              (make-transition 'game-screen 'game-menu-button 'menu-screen)
-                                             (make-transition 'game-screen 'game-save-button 'save-screen))))
+                                             (make-transition 'game-screen 'game-save-button 'save-screen)
+                                             (make-transition 'game-screen 'complete 'win-screen))))
 
 (define (handle-event event)
   (set! game-state (state-machine-get-next game-state event))
@@ -53,7 +54,6 @@
 
 (define (set-game-state state)
   (clear-panels)
-  (display (format "~a\n" state))
   (case state
     [(login-screen) (send login-panel show #t)]
     [(new-user-screen) (send new-user-panel show #t)]
@@ -62,14 +62,15 @@
     [(about-screen) (send about-panel show #t)]
     [(invalid-login-screen) (send invalid-login-panel show #t)]
     [(options-screen) (send options-panel show #t)]
-    [(instructions-screen) (send instructions-panel show #t)]))
+    [(instructions-screen) (send instructions-panel show #t)]
+    [(save-screen) (send save-panel show #t)]))
 
 ; Save system
 
 (define save-file-path "save.dat")
 (if (file-exists? save-file-path)
     (void)
-    (with-output-to-file save-file-path (λ () (display '())))) ; Generate a new save file if there isn't one
+    (with-output-to-file save-file-path (λ () (write '())))) ; Generate a new save file if there isn't one
 
 ; Login system
 
@@ -81,17 +82,16 @@
          [matches (filter (λ (x) (eq? (save-file-user-get-name x) name)) save-value)]
          [pass-hash (password-hash pass)])
     (if (empty? matches)
-        (begin (with-output-to-file save-file-path (λ () (display (cons (make-save-file-user name pass-hash '()) save-value))) #:exists 'replace)
+        (begin (with-output-to-file save-file-path (λ () (write (cons (make-save-file-user name pass-hash '()) save-value))) #:exists 'replace)
                #t)
         #f)))
 
 (define (check-login name pass)
   (let* ([save-value (file->value save-file-path)]
-         [matches (filter (λ (x) (string=? (symbol->string (save-file-user-get-name x)) name)) save-value)]
+         [matches (filter (λ (x) (string=? (save-file-user-get-name x) name)) save-value)]
          [pass-hash (password-hash pass)])
-    (display (save-file-user-get-pass-hash (first matches)))
     (and (not (empty? matches))
-         (string=? (symbol->string (save-file-user-get-pass-hash (first matches))) pass-hash))))
+         (string=? (save-file-user-get-pass-hash (first matches)) pass-hash))))
 
 ; Top level window
 
@@ -127,6 +127,7 @@
 (define invalid-login-panel (make-invalid-login-panel check-login master-panel handle-event))
 (define instructions-panel (make-instructions-panel master-panel handle-event))
 (define options-panel (make-options-panel set-options master-panel handle-event))
+(define save-panel (make-save-panel save-file-path master-panel handle-event))
 
 (init-frame frame game-panel)
 
@@ -138,7 +139,8 @@
   (send game-panel show #f)
   (send invalid-login-panel show #f)
   (send instructions-panel show #f)
-  (send options-panel show #f))
+  (send options-panel show #f)
+  (send save-panel show #f))
 
 (handle-event 'begin)
 (send frame show #t)
