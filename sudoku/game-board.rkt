@@ -52,7 +52,8 @@
         (begin
           (send dc set-font small-font)
           (for* ([i n][j n])
-            (let*-values ([(value) (+ 1 i (* j n))]
+            (let*-values ([(tile) (puzzle-ref puzzle pos)]
+                          [(value) (+ 1 i (* j n))]
                           [(text) (format "~a" value)]
                           [(text-width text-height descender ascender) (send dc get-text-extent text)]
                           [(text-x) (- (* (1+ i) (/ square-size (1+ n))) (/ text-width 2))]
@@ -61,7 +62,9 @@
                                                                                                                       (+ (* y square-size) text-y))
                                                                                                             (make-pos text-width
                                                                                                                       text-height)))])
-              ; (send dc set-text-foreground (make-object color% 0 0 255))
+              (send dc set-text-foreground (if (set-member? (tile-get-marked tile) value)
+                                               (make-object color% 255 0 0)
+                                               (make-object color%)))
               (set! click-rects (cons rect click-rects))
               (send dc draw-text text text-x text-y))))
         (begin
@@ -101,8 +104,12 @@
                         (replace-puzzle-tile puzzle
                                              pos
                                              (make-tile value))
-                        puzzle))))
-  
+                        (if (eq? click-type 'right-down)
+                            (replace-puzzle-tile puzzle
+                                                 pos
+                                                 (tile-toggle-marked (puzzle-ref puzzle pos) value))
+                            puzzle)))))
+
 (define (click-function-large puzzle x y)
   (let ([pos (make-pos x y)])
     (λ (click-type)

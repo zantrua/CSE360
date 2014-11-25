@@ -45,7 +45,7 @@
            [score-msg (new message%
                            [parent game-bar-panel]
                            [label "Score: 0"])]
-           [sudoku-canvas% (class canvas% 
+           [sudoku-canvas% (class canvas%
                              (define/override (on-event event) 
                                (let* ([event-type (send event get-event-type)] 
                                       [mouse-x (send event get-x)] 
@@ -53,9 +53,8 @@
                                       [mouse-pos (make-pos mouse-x mouse-y)]) 
                                  (if (or (eq? event-type 'left-down) 
                                          (eq? event-type 'right-down))
-                                     (begin (set! puzzle (handle-click puzzle mouse-pos event-type))
-                                            (set! correct-cells (puzzle-count-correct puzzle)))
-                                     (void)) 
+                                     (set! puzzle (handle-click puzzle mouse-pos event-type))
+                                     (void))
                                  (send game-canvas refresh))) 
                              (super-new))]
            [game-canvas (new sudoku-canvas%
