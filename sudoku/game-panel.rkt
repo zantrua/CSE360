@@ -55,7 +55,7 @@
            [time-msg (new message%
                            [parent game-bar-panel]
                            [label "Time: 0"]
-                           [min-width 200])]
+                           [auto-resize #t])]
            [sudoku-canvas% (class canvas%
                              (define/override (on-event event) 
                                (let* ([event-type (send event get-event-type)] 

@@ -11,7 +11,8 @@
                      [parent master-panel])]
          [difficulty-msg (new message%
                               [parent panel]
-                              [label "Difficulty Level: Easy"])]
+                              [label "Difficulty Level: Easy"]
+                              [auto-resize #t])]
          [set-difficulty! (λ (diff) (set! difficulty diff) (send difficulty-msg set-label (format "Difficulty Level: ~a" difficulty)))]
          [easy-button (new button%
                            [parent panel]

@@ -11,6 +11,10 @@
                                     [parent panel]
                                     [label "New Game"]
                                     [callback (λ (button event) (handle-event 'new-game-button))])]
+         [load-button (new button%
+                                    [parent panel]
+                                    [label "Load"]
+                                    [callback (λ (button event) (handle-event 'load-button))])]
          [about-button (new button%
                                  [parent panel]
                                  [label "About"]

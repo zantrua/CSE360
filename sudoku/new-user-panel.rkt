@@ -10,7 +10,7 @@
          [user-name (new text-field%
                          [parent new-user-panel]
                          [label "Username"]
-                          [stretchable-width #f]
+                         [stretchable-width #f]
                          [min-width 200])]
          [password (new text-field%
                         [parent new-user-panel]

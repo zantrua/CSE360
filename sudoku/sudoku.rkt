@@ -130,7 +130,7 @@
 
 ; Panels
 
-(define frame-size 300)
+(define frame-size 0)
 (define frame (make-frame frame-size))
 (define master-panel (make-master-panel frame))
 
