@@ -5,7 +5,7 @@
          (file "position.rkt")
          racket/gui)
 
-(provide make-game-panel set-options)
+(provide make-game-panel set-options load-game)
 
 (define puzzle '())
 (define options '())
@@ -20,7 +20,11 @@
     (set! options (list avg-time hints))
     (set! seconds 0)
     (set! mistakes 0)
-    (set! hints-used 0)))
+    (set! hints-used 0)
+    (set! game-difficulty difficulty)))
+
+(define (load-game game)
+  (void))
 
 (define (get-avg-time)
   (first options))
@@ -31,8 +35,9 @@
 (define seconds 0)
 (define mistakes 0)
 (define hints-used 0)
+(define game-difficulty 'easy)
 
-(define (make-game-panel master-panel handle-event)
+(define (make-game-panel set-save-options master-panel handle-event)
   (letrec ([game-panel (new vertical-panel% [parent master-panel])]
            [game-bar-panel (new horizontal-panel%
                                 [parent game-panel]
@@ -40,7 +45,9 @@
            [game-save-button (new button%
                                   [parent game-bar-panel]
                                   [label "Save"]
-                                  [callback (λ (button event) (handle-event 'game-save-button))])]
+                                  [callback (λ (button event)
+                                              (set-save-options (list game-difficulty seconds hints-used mistakes puzzle))
+                                              (handle-event 'game-save-button))])]
            [game-menu-button (new button%
                                   [parent game-bar-panel]
                                   [label "Menu"]
@@ -60,7 +67,7 @@
                                      (set! puzzle (handle-click puzzle mouse-pos event-type))
                                      (void))
                                  (send game-canvas refresh)
-                                 (if (puzzle-solved? puzzle)
+                                 (if (puzzle-solved? puzzle #t)
                                      (handle-event 'complete)
                                      (void))))
                              (super-new))]
