@@ -3,6 +3,7 @@
 (require (file "puzzle.rkt")
          (file "game-board.rkt")
          (file "position.rkt")
+         (file "tile.rkt")
          racket/gui)
 
 (provide make-game-panel set-options load-game-options)
@@ -64,6 +65,20 @@
                                   [parent game-bar-panel]
                                   [label "Menu"]
                                   [callback (λ (button event) (handle-event 'game-menu-button))])]
+           [hint-button (new button%
+                             [parent game-bar-panel]
+                             [label "Hint"]
+                             [callback (λ (button event) (let ([hint (puzzle-get-hint puzzle)])
+                                                           (display hint)
+                                                           (set! puzzle (replace-puzzle-tile puzzle
+                                                                                             (first hint)
+                                                                                             (make-tile (second hint) #f empty #t)))
+                                                           (set! hints-used (+ 1 hints-used))
+                                                           (send game-canvas refresh)
+                                                           (if (puzzle-solved? puzzle #t)
+                                                               (begin (set-score (calc-score) (symbol->string game-difficulty) (get-user-name))
+                                                                      (handle-event 'complete))
+                                                               (void))))])]
            [time-msg (new message%
                            [parent game-bar-panel]
                            [label "Time: 0"]
@@ -72,6 +87,10 @@
                               [parent game-bar-panel]
                               [label "Mistakes: 0"]
                               [auto-resize #t])]
+           [hints-msg (new message%
+                           [parent game-bar-panel]
+                           [label "Hints left: 0"]
+                           [auto-resize #t])]
            [sudoku-canvas% (class canvas%
                              (define/override (on-event event) 
                                (let* ([event-type (send event get-event-type)] 

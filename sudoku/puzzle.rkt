@@ -5,7 +5,8 @@
          (file "partial-puzzle.rkt")
          (file "tile.rkt"))
 
-(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref replace-puzzle-tile puzzle-print puzzle-unsolve puzzle-count-correct)
+(provide make-empty-puzzle make-puzzle puzzle-solved? puzzle-width puzzle-ref
+         replace-puzzle-tile puzzle-print puzzle-unsolve puzzle-get-hint)
 
 ; Makes an empty puzzle by filling the grid with empty tiles
 (define (make-empty-puzzle (n 3))
@@ -105,8 +106,17 @@
                                                                              (puzzle-ref p pos))) width) (1- steps))))))])
     (remove-step p (floor (* (square width) part-to-remove)))))
 
-(define (assert x)
-  (if x (void) (error "asdf")))
-
-(define (puzzle-count-correct p)
-  (values 0 0))
+(define (puzzle-get-hint p)
+  (let* ([width (puzzle-width p)]
+         [empty-squares (filter-map (λ (pos) (let ([tile (puzzle-ref p pos)])
+                                               (if (= (tile-get-value tile) 0)
+                                                   pos
+                                                   #f))) (cartesian-product (range width) (range width)))]
+         [get-possible (λ (p pos) (filter-map (λ (val) (if (puzzle-solved? (replace-puzzle-tile p pos (make-tile val)))
+                                                           val
+                                                           #f)) (shuffle (range 1 (+ 1 width)))))])
+    (let ([possible (filter-map (λ (pos) (let ([possible (get-possible p pos)])
+                                           (if (empty? possible)
+                                               #f
+                                               (list pos (first possible))))) (shuffle empty-squares))])
+      (first possible))))

@@ -79,9 +79,9 @@
                                                                                                               text-height)))])
             (set! click-rects (cons rect click-rects))
             (send dc set-text-foreground
-                  (if (tile-get-locked (puzzle-ref puzzle pos))
-                      (make-object color%)
-                      (make-object color% 0 0 255)))
+                  (cond [(tile-get-hinted (puzzle-ref puzzle pos)) (make-object color% 255 0 0)]
+                        [(tile-get-locked (puzzle-ref puzzle pos)) (make-object color%)]
+                        [else (make-object color% 0 0 255)]))
             (send dc draw-text text text-x text-y))))
     bitmap))
 
