@@ -1,12 +1,19 @@
 #lang racket
 
-(require racket/gui)
+(require (file "save-file.rkt")
+         racket/gui)
 
-(provide make-load-panel)
+(provide make-load-panel load-games)
 
 (define game-list empty)
 
-(define (make-load-panel save-file-path get-user-name master-panel handle-event)
+(define (load-games save-file-path get-user-name)
+  (let* ([file-data (file->value save-file-path)]
+         [user (filter (λ (user) (string=? (get-user-name) (save-file-user-get-name user))) file-data)]
+         [game-names (map (λ (game) (save-file-game-get-name game)) (save-file-user-get-games (first user)))])
+    (send game-list set game-names)))
+
+(define (make-load-panel master-panel handle-event)
   (let* ([panel (new vertical-panel%
                      [parent master-panel])]
          [game-list-inner (new list-box%

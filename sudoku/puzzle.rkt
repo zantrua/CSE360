@@ -47,8 +47,8 @@
   (let* ([width (puzzle-width p)]
          [in-square? (λ (pos n)
                        (let* ([sqrt-width (sqrt width)]
-                              [square-x (modulo n 3)]
-                              [square-y (quotient n 3)]
+                              [square-x (modulo n sqrt-width)]
+                              [square-y (quotient n sqrt-width)]
                               [start-x (* sqrt-width square-x)]
                               [start-y (* sqrt-width square-y)])
                          (let-values ([(x y) (pos-get-values pos)])

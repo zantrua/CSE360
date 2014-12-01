@@ -30,6 +30,11 @@
                            [parent panel]
                            [label "Evil"]
                            [callback (λ (button event) (set-difficulty! 'evil))])]
+         [size-choice (new choice%
+                           [parent panel]
+                           [label "Size"]
+                           [choices (map (λ (x) (number->string (* x x))) (range 3 6))]
+                           [callback (λ (choice event) (set! size (sqrt (string->number (send choice get-string-selection)))))])]
          [start-game-button (new button%
                                  [parent panel]
                                  [label "Start Game"]
