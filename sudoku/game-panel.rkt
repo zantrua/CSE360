@@ -5,7 +5,7 @@
          (file "position.rkt")
          racket/gui)
 
-(provide make-game-panel set-options load-game)
+(provide make-game-panel set-options load-game-options)
 
 (define puzzle '())
 (define options '())
@@ -23,8 +23,12 @@
     (set! hints-used 0)
     (set! game-difficulty difficulty)))
 
-(define (load-game game)
-  (void))
+(define (load-game-options difficulty time hints mistakes board)
+  (set-options difficulty 3)
+  (set! game-difficulty difficulty)
+  (set! seconds time)
+  (set! hints-used hints)
+  (set! puzzle board))
 
 (define (get-avg-time)
   (first options))

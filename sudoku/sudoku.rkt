@@ -79,7 +79,7 @@
     [(instructions-screen) (send instructions-panel show #t)]
     [(save-screen) (send save-panel show #t)]
     [(load-screen) (begin (load-games save-file-path user-name-get) (send load-panel show #t))]
-    [(scores-screen) (send scores-panel show #t)]
+    [(scores-screen) (begin (update-scores) (send scores-panel show #t))]
     [(win-screen) (send win-panel show #t)]))
 
 ; Save system
@@ -160,7 +160,7 @@
 (define instructions-panel (make-instructions-panel master-panel handle-event))
 (define options-panel (make-options-panel set-options master-panel handle-event))
 (define save-panel (make-save-panel save-file-path user-name-get get-save-options master-panel handle-event))
-(define load-panel (make-load-panel master-panel handle-event))
+(define load-panel (make-load-panel load-game-options save-file-path user-name-get master-panel handle-event))
 (define scores-panel (make-scores-panel master-panel handle-event))
 (define win-panel (make-win-panel scores-file-path master-panel handle-event))
 

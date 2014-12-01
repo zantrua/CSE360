@@ -3,7 +3,7 @@
 (require (planet joskoot/planet-fmt:1:10/fmt)
          racket/gui)
 
-(provide make-scores-panel scores-file-path)
+(provide make-scores-panel scores-file-path update-scores)
 
 (define difficulties '("easy" "medium" "hard" "evil"))
 
@@ -12,8 +12,6 @@
     (void)
     (with-output-to-file scores-file-path (λ () (write (let ([score-list (make-list 10 '("Nobody" 0))])
                                                          (map cons difficulties (make-list 4 score-list)))))))
-
-(define score-font (send the-font-list find-or-create-font 12 'modern 'normal 'normal))
 
 (define (get-scores level)
   (let* ([all-scores (file->value scores-file-path)]
@@ -27,6 +25,10 @@
     (let ([score (list-ref scores (+ 1 i))])
       (send (list-ref msgs i) set-label ((fmt "'#'L4D C16D C16D") (+ 1 i) (first score) (second score))))))
 
+(define msgs-update empty)
+(define (update-scores)
+  (draw-scores msgs-update (get-scores (first difficulties))))
+
 (define (make-scores-panel master-panel handle-event)
   (letrec ([panel (new vertical-panel%
                        [parent master-panel])]
@@ -38,11 +40,12 @@
                             [parent panel]
                             [choices difficulties]
                             [callback (λ (tab-panel event)
-                                        (let ((selection (send tab-panel get-selection)))
+                                        (let ([selection (send tab-panel get-selection)])
                                           (draw-scores msgs (get-scores (list-ref difficulties selection)))))])]
            [msgs (map (λ (x) (new message%
                                            [parent score-tabs]
                                            [label ""]
                                            [auto-resize #t])) (range 10))])
+    (set! msgs-update msgs)
     (draw-scores msgs (get-scores (first difficulties)))
     panel))
