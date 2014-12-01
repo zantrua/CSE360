@@ -23,6 +23,10 @@
                                    [parent panel]
                                    [label "Instructions"]
                                    [callback (λ (button event) (handle-event 'instructions-button))])]
+         [scores-button (new button%
+                             [parent panel]
+                             [label "High Scores"]
+                             [callback (λ (button event) (handle-event 'scores-button))])]
          [logout-button (new button%
                                  [parent panel]
                                  [label "Log out"]

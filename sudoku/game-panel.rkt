@@ -12,7 +12,7 @@
 
 (define (set-options difficulty size)
   (let-values ([(remove-frac avg-time hints) (case difficulty
-                                               [(easy)   (values 0.1 1000 10)]
+                                               [(easy)   (values 1/81 1000 10)]
                                                [(medium) (values 0.6 1200  5)]
                                                [(hard)   (values 0.7 1500  2)]
                                                [(evil)   (values 0.8 2000  0)])])
@@ -37,7 +37,10 @@
 (define hints-used 0)
 (define game-difficulty 'easy)
 
-(define (make-game-panel set-save-options master-panel handle-event)
+(define (calc-score)
+  (- 8100 (* 100 mistakes) seconds))
+
+(define (make-game-panel set-save-options set-score get-user-name master-panel handle-event)
   (letrec ([game-panel (new vertical-panel% [parent master-panel])]
            [game-bar-panel (new horizontal-panel%
                                 [parent game-panel]
@@ -68,7 +71,8 @@
                                      (void))
                                  (send game-canvas refresh)
                                  (if (puzzle-solved? puzzle #t)
-                                     (handle-event 'complete)
+                                     (begin (set-score (calc-score) (symbol->string game-difficulty) (get-user-name))
+                                            (handle-event 'complete))
                                      (void))))
                              (super-new))]
            [game-canvas (new sudoku-canvas%

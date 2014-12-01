@@ -6,7 +6,8 @@
 (provide make-save-panel)
 
 (define (make-save-panel save-file-path user-name-get options-get master-panel handle-event)
-  (let* ([panel (new vertical-panel% [parent master-panel])]
+  (let* ([panel (new vertical-panel%
+                     [parent master-panel])]
          [msg (new message%
                    [parent panel]
                    [label "Name is valid"]
@@ -17,7 +18,7 @@
          [btn (new button%
                    [parent panel]
                    [label "Save"]
-                   [callback (λ (button event) 
+                   [callback (λ (button event)
                                (let* ([name (send name get-value)]
                                       [options (options-get)]
                                       [game (make-save-file-game name

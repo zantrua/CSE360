@@ -10,6 +10,8 @@
          (file "options-panel.rkt")
          (file "save-panel.rkt")
          (file "load-panel.rkt")
+         (file "scores-panel.rkt")
+         (file "win-panel.rkt")
          
          (file "game-board.rkt")
          (file "state-machine.rkt")
@@ -38,7 +40,10 @@
                                              (make-transition 'menu-screen 'new-game-button 'options-screen)
                                              (make-transition 'menu-screen 'load-button 'load-screen)
                                              (make-transition 'menu-screen 'instructions-button 'instructions-screen)
+                                             (make-transition 'menu-screen 'scores-button 'scores-screen)
                                              (make-transition 'menu-screen 'logout-button 'login-screen)
+                                             
+                                             (make-transition 'scores-screen 'menu-button 'menu-screen)
                                              
                                              (make-transition 'about-screen 'menu-button 'menu-screen)
                                              
@@ -50,10 +55,14 @@
                                              (make-transition 'game-screen 'game-save-button 'save-screen)
                                              (make-transition 'game-screen 'complete 'win-screen)
                                              
-                                             (make-transition 'save-screen 'saved 'game-screen))))
+                                             (make-transition 'win-screen 'menu-button 'menu-screen)
+                                             
+                                             (make-transition 'save-screen 'saved 'game-screen)
+                                             
+                                             (make-transition 'load-screen 'menu-button 'menu-screen)
+                                             (make-transition 'load-screen 'load-button 'game-screen))))
 
 (define (handle-event event)
-  (write event)
   (set! game-state (state-machine-get-next game-state event))
   (set-game-state (state-machine-get-state game-state)))
 
@@ -69,7 +78,9 @@
     [(options-screen) (send options-panel show #t)]
     [(instructions-screen) (send instructions-panel show #t)]
     [(save-screen) (send save-panel show #t)]
-    [(load-screen) (send load-panel show #t)]))
+    [(load-screen) (send load-panel show #t)]
+    [(scores-screen) (send scores-panel show #t)]
+    [(win-screen) (send win-panel show #t)]))
 
 ; Save system
 
@@ -141,12 +152,14 @@
 (define new-user-panel (make-new-user-panel make-login master-panel handle-event))
 (define menu-panel (make-menu-panel master-panel handle-event))
 (define about-panel (make-about-panel master-panel handle-event))
-(define game-panel (make-game-panel set-save-options master-panel handle-event))
+(define game-panel (make-game-panel set-save-options set-score user-name-get master-panel handle-event))
 (define invalid-login-panel (make-invalid-login-panel check-login master-panel handle-event))
 (define instructions-panel (make-instructions-panel master-panel handle-event))
 (define options-panel (make-options-panel set-options master-panel handle-event))
 (define save-panel (make-save-panel save-file-path user-name-get get-save-options master-panel handle-event))
 (define load-panel (make-load-panel save-file-path user-name-get master-panel handle-event))
+(define scores-panel (make-scores-panel master-panel handle-event))
+(define win-panel (make-win-panel scores-file-path master-panel handle-event))
 
 (init-frame frame game-panel)
 
@@ -160,7 +173,9 @@
   (send instructions-panel show #f)
   (send options-panel show #f)
   (send save-panel show #f)
-  (send load-panel show #f))
+  (send load-panel show #f)
+  (send scores-panel show #f)
+  (send win-panel show #f))
 
 (handle-event 'begin)
 (send frame show #t)
