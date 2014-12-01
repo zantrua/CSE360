@@ -4,6 +4,7 @@
          (file "game-board.rkt")
          (file "position.rkt")
          (file "tile.rkt")
+         (file "utility.rkt")
          racket/gui)
 
 (provide make-game-panel set-options load-game-options)
@@ -12,6 +13,7 @@
 (define options empty)
 
 (define mistakes-message empty)
+(define hints-message empty)
 
 (define (set-options difficulty size)
   (let-values ([(remove-frac avg-time hints) (case difficulty
@@ -25,7 +27,8 @@
     (set! mistakes 0)
     (set! hints-used 0)
     (set! game-difficulty difficulty)
-    (send mistakes-message set-label "Mistakes: 0")))
+    (send mistakes-message set-label "Mistakes: 0")
+    (send hints-message set-label (format "Hints left: ~a" (- (get-hints-allowed) hints-used)))))
 
 (define (load-game-options difficulty time hints mistakes-inner board)
   (set-options difficulty 3)
@@ -34,7 +37,8 @@
   (set! hints-used hints)
   (set! mistakes mistakes-inner)
   (set! puzzle board)
-  (send mistakes-message set-label (format "Mistakes: ~a" mistakes)))
+  (send mistakes-message set-label (format "Mistakes: ~a" mistakes))
+  (send hints-message set-label (format "Hints left: ~a" (- (get-hints-allowed) hints-used))))
 
 (define (get-avg-time)
   (first options))
@@ -48,7 +52,10 @@
 (define game-difficulty 'easy)
 
 (define (calc-score)
-  (- 8100 (* 100 mistakes) seconds))
+  (let ([width (puzzle-width puzzle)])
+    (- (length (filter-map (λ (pos) (let ([tile (puzzle-ref puzzle pos)])
+                                      (not (= (tile-get-value tile) 0)))) (cartesian-product (range width) (range width))))
+       (* 100 hints-used) (* 50 mistakes) seconds)))
 
 (define (make-game-panel set-save-options set-score get-user-name master-panel handle-event)
   (letrec ([game-panel (new vertical-panel% [parent master-panel])]
@@ -68,17 +75,25 @@
            [hint-button (new button%
                              [parent game-bar-panel]
                              [label "Hint"]
-                             [callback (λ (button event) (let ([hint (puzzle-get-hint puzzle)])
-                                                           (display hint)
-                                                           (set! puzzle (replace-puzzle-tile puzzle
-                                                                                             (first hint)
-                                                                                             (make-tile (second hint) #f empty #t)))
-                                                           (set! hints-used (+ 1 hints-used))
-                                                           (send game-canvas refresh)
-                                                           (if (puzzle-solved? puzzle #t)
-                                                               (begin (set-score (calc-score) (symbol->string game-difficulty) (get-user-name))
-                                                                      (handle-event 'complete))
-                                                               (void))))])]
+                             [callback (λ (button event) (if (> (- (get-hints-allowed) hints-used) 0)
+                                                             (let ([hint (puzzle-get-hint puzzle)])
+                                                               (set! puzzle (replace-puzzle-tile puzzle
+                                                                                                 (first hint)
+                                                                                                 (make-tile (second hint) #f empty #t)))
+                                                               (set! hints-used (+ 1 hints-used))
+                                                               (send game-canvas refresh)
+                                                               (send hints-msg set-label (format "Hints left: ~a" (- (get-hints-allowed) hints-used)))
+                                                               (if (puzzle-solved? puzzle #t)
+                                                                   (begin (set-score (calc-score) (symbol->string game-difficulty) (get-user-name))
+                                                                          (handle-event 'complete))
+                                                                   (void)))
+                                                             (void)))])]
+           [score-button (new button%
+                              [parent game-bar-panel]
+                              [label "Score now"]
+                              [callback (λ (button event)
+                                          (set-score (calc-score) (symbol->string game-difficulty) (get-user-name))
+                                          (handle-event 'complete))])]
            [time-msg (new message%
                            [parent game-bar-panel]
                            [label "Time: 0"]
@@ -118,4 +133,5 @@
                        [notify-callback (λ () (set! seconds (+ 1 seconds))
                                               (send time-msg set-label (format "Time: ~a" seconds)))])])
     (set! mistakes-message mistakes-msg)
+    (set! hints-message hints-msg)
     game-panel))
