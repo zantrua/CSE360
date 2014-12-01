@@ -53,8 +53,8 @@
 
 (define (calc-score)
   (let ([width (puzzle-width puzzle)])
-    (- (length (filter-map (λ (pos) (let ([tile (puzzle-ref puzzle pos)])
-                                      (not (= (tile-get-value tile) 0)))) (cartesian-product (range width) (range width))))
+    (- (* 100 (length (filter-map (λ (pos) (let ([tile (puzzle-ref puzzle pos)])
+                                      (not (= (tile-get-value tile) 0)))) (cartesian-product (range width) (range width)))))
        (* 100 hints-used) (* 50 mistakes) seconds)))
 
 (define (make-game-panel set-save-options set-score get-user-name master-panel handle-event)
