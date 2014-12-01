@@ -2,11 +2,20 @@
 
 (require racket/gui)
 
-(provide make-menu-panel)
+(provide make-menu-panel set-user-greeting)
 
-(define (make-menu-panel master-panel handle-event)
+(define greeting-message empty)
+
+(define (set-user-greeting name)
+  (send greeting-message set-label (format "Hello, ~a" name)))
+
+(define (make-menu-panel get-user-name master-panel handle-event)
   (let* ([panel (new vertical-panel%
                           [parent master-panel])]
+         [message (new message%
+                       [parent panel]
+                       [label "Hello, user"]
+                       [auto-resize #t])]
          [new-game-button (new button%
                                     [parent panel]
                                     [label "New Game"]
@@ -31,4 +40,5 @@
                                  [parent panel]
                                  [label "Log out"]
                                  [callback (λ (button event) (handle-event 'logout-button))])])
+    (set! greeting-message message)
     panel))

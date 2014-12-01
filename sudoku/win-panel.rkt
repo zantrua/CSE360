@@ -26,15 +26,15 @@
 
 (define (make-win-panel scores-file-path-local master-panel handle-event)
   (let* ([panel (new vertical-panel%
-                       [parent master-panel])]
-           [menu-button (new button%
-                             [parent panel]
-                             [label "Menu"]
-                             [callback (λ (button event) (handle-event 'menu-button))])]
-           [message (new message%
-                         [parent panel]
-                         [label "Winner! "]
-                         [auto-resize #t])])
+                     [parent master-panel])]
+         [menu-button (new button%
+                           [parent panel]
+                           [label "Menu"]
+                           [callback (λ (button event) (handle-event 'menu-button))])]
+         [message (new message%
+                       [parent panel]
+                       [label "Winner! "]
+                       [auto-resize #t])])
     (set! win-message message)
     (set! scores-file-path scores-file-path-local)
     panel))

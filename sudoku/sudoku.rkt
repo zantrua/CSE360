@@ -63,13 +63,6 @@
                                              (make-transition 'load-screen 'load-button 'game-screen))))
 
 (define (handle-event event)
-  (display (state-machine-get-state game-state))
-  (display "(")
-  (display event)
-  (display ") -> ")
-  (display (state-machine-get-state (state-machine-get-next game-state event)))
-  (display "\n")
-  
   (set! game-state (state-machine-get-next game-state event))
   (set-game-state (state-machine-get-state game-state)))
 
@@ -110,6 +103,8 @@
              [pass-hash (password-hash pass)])
         (if (empty? matches)
             (begin (with-output-to-file save-file-path (λ () (write (cons (make-save-file-user name pass-hash '()) save-value))) #:exists 'replace)
+                   (set! user-name name)
+                   (set-user-greeting name)
                    #t)
             #f))
       #f))
@@ -119,6 +114,7 @@
          [matches (filter (λ (x) (string=? (save-file-user-get-name x) name)) save-value)]
          [pass-hash (password-hash pass)])
     (set! user-name name)
+    (set-user-greeting name)
     (and (not (empty? matches))
          (string=? (save-file-user-get-pass-hash (first matches)) pass-hash))))
 
@@ -157,7 +153,7 @@
 
 (define login-panel (make-login-panel check-login master-panel handle-event))
 (define new-user-panel (make-new-user-panel make-login master-panel handle-event))
-(define menu-panel (make-menu-panel master-panel handle-event))
+(define menu-panel (make-menu-panel user-name-get master-panel handle-event))
 (define about-panel (make-about-panel master-panel handle-event))
 (define game-panel (make-game-panel set-save-options set-score user-name-get master-panel handle-event))
 (define invalid-login-panel (make-invalid-login-panel check-login master-panel handle-event))
