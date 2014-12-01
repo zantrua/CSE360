@@ -63,6 +63,13 @@
                                              (make-transition 'load-screen 'load-button 'game-screen))))
 
 (define (handle-event event)
+  (display (state-machine-get-state game-state))
+  (display "(")
+  (display event)
+  (display ") -> ")
+  (display (state-machine-get-state (state-machine-get-next game-state event)))
+  (display "\n")
+  
   (set! game-state (state-machine-get-next game-state event))
   (set-game-state (state-machine-get-state game-state)))
 

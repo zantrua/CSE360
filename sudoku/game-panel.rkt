@@ -13,9 +13,9 @@
 (define (set-options difficulty size)
   (let-values ([(remove-frac avg-time hints) (case difficulty
                                                [(easy)   (values 1/81 1000 10)]
-                                               [(medium) (values 0.6 1200  5)]
-                                               [(hard)   (values 0.7 1500  2)]
-                                               [(evil)   (values 0.8 2000  0)])])
+                                               [(medium) (values 0.4 1200  5)]
+                                               [(hard)   (values 0.5 1500  2)]
+                                               [(evil)   (values 0.6 2000  0)])])
     (set! puzzle (puzzle-unsolve (make-puzzle size) remove-frac))
     (set! options (list avg-time hints))
     (set! seconds 0)
@@ -67,12 +67,12 @@
                                       [mouse-pos (make-pos mouse-x mouse-y)]) 
                                  (if (or (eq? event-type 'left-down) 
                                          (eq? event-type 'right-down))
-                                     (set! puzzle (handle-click puzzle mouse-pos event-type))
-                                     (void))
-                                 (send game-canvas refresh)
-                                 (if (puzzle-solved? puzzle #t)
-                                     (begin (set-score (calc-score) (symbol->string game-difficulty) (get-user-name))
-                                            (handle-event 'complete))
+                                     (begin (set! puzzle (handle-click puzzle mouse-pos event-type))
+                                            (send game-canvas refresh)
+                                            (if (puzzle-solved? puzzle #t)
+                                                (begin (set-score (calc-score) (symbol->string game-difficulty) (get-user-name))
+                                                       (handle-event 'complete))
+                                                (void)))
                                      (void))))
                              (super-new))]
            [game-canvas (new sudoku-canvas%
