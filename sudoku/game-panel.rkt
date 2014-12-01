@@ -7,8 +7,10 @@
 
 (provide make-game-panel set-options load-game-options)
 
-(define puzzle '())
-(define options '())
+(define puzzle empty)
+(define options empty)
+
+(define mistakes-message empty)
 
 (define (set-options difficulty size)
   (let-values ([(remove-frac avg-time hints) (case difficulty
@@ -21,14 +23,17 @@
     (set! seconds 0)
     (set! mistakes 0)
     (set! hints-used 0)
-    (set! game-difficulty difficulty)))
+    (set! game-difficulty difficulty)
+    (send mistakes-message set-label "Mistakes: 0")))
 
-(define (load-game-options difficulty time hints mistakes board)
+(define (load-game-options difficulty time hints mistakes-inner board)
   (set-options difficulty 3)
   (set! game-difficulty difficulty)
   (set! seconds time)
   (set! hints-used hints)
-  (set! puzzle board))
+  (set! mistakes mistakes-inner)
+  (set! puzzle board)
+  (send mistakes-message set-label (format "Mistakes: ~a" mistakes)))
 
 (define (get-avg-time)
   (first options))
@@ -63,6 +68,10 @@
                            [parent game-bar-panel]
                            [label "Time: 0"]
                            [auto-resize #t])]
+           [mistakes-msg (new message%
+                              [parent game-bar-panel]
+                              [label "Mistakes: 0"]
+                              [auto-resize #t])]
            [sudoku-canvas% (class canvas%
                              (define/override (on-event event) 
                                (let* ([event-type (send event get-event-type)] 
@@ -76,7 +85,10 @@
                                             (if (puzzle-solved? puzzle #t)
                                                 (begin (set-score (calc-score) (symbol->string game-difficulty) (get-user-name))
                                                        (handle-event 'complete))
-                                                (void)))
+                                                (if (puzzle-solved? puzzle #f)
+                                                    (void)
+                                                    (begin (set! mistakes (+ 1 mistakes))
+                                                           (send mistakes-msg set-label (format "Mistakes: ~a" mistakes))))))
                                      (void))))
                              (super-new))]
            [game-canvas (new sudoku-canvas%
@@ -86,4 +98,5 @@
                        [interval 1000]
                        [notify-callback (λ () (set! seconds (+ 1 seconds))
                                               (send time-msg set-label (format "Time: ~a" seconds)))])])
+    (set! mistakes-message mistakes-msg)
     game-panel))
