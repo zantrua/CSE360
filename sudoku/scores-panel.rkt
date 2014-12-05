@@ -16,7 +16,6 @@
 (define (get-scores level)
   (let* ([all-scores (file->value scores-file-path)]
          [scores (filter (λ (line) (string=? (first line) level)) all-scores)])
-    (display (first scores))
     (first scores)))
 
 (define (draw-scores msgs scores)

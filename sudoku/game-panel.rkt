@@ -16,10 +16,10 @@
 
 (define (set-options difficulty size)
   (let-values ([(remove-frac avg-time hints) (case difficulty
-                                               [(easy)   (values 1/81 1000 10)]
-                                               [(medium) (values 0.4 1200  5)]
-                                               [(hard)   (values 0.5 1500  2)]
-                                               [(evil)   (values 0.6 2000  0)])])
+                                               [(easy)   (values 0.4 1000 10)]
+                                               [(medium) (values 0.5 1200  5)]
+                                               [(hard)   (values 0.6 1500  2)]
+                                               [(evil)   (values 0.7 2000  0)])])
     (set! puzzle (puzzle-unsolve (make-puzzle size) remove-frac))
     (set! options (list avg-time hints))
     (set! seconds 0)

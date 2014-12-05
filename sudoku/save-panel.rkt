@@ -36,6 +36,7 @@
                                                                  #f
                                                                  (make-save-file-user (save-file-user-get-name user)
                                                                                       (save-file-user-get-pass-hash user)
+                                                                                      (save-file-user-get-pass-salt user)
                                                                                       (cons game games))))
                                                            user)) save-state)])
                                  (if (andmap identity save-new)

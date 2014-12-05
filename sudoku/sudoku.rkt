@@ -93,7 +93,7 @@
 ; Login system
 
 (define (make-salt)
-  (map (λ (x) (string-ref "0123456789abcdef" (random 16))) (range 64)))
+  (apply string (map (λ (x) (string-ref "0123456789abcdef" (random 16))) (range 64))))
 
 (define (password-hash pass salt)
   (bytes->hex-string (sha256 (string->bytes/utf-8 (string-append pass salt)))))
