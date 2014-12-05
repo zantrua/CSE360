@@ -93,7 +93,7 @@
     (set! small-font (send the-font-list find-or-create-font (cond ((= width 9) 10) ; Adjust font size for different boards
                                                                    ((= width 16) 8)
                                                                    ((= width 25) 5)) 'default 'normal 'normal))
-    (define square-size (/ size-x width))
+    (define square-size (/ (min size-x size-y) width))
     (set! click-rects empty)
     (for* ([x width][y width])
       (send dc
