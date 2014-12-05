@@ -8,7 +8,8 @@
   (let* ([difficulty 'easy]
          [size 3]
          [panel (new vertical-panel%
-                     [parent master-panel])]
+                     [parent master-panel]
+                     [alignment '(center center)])]
          [difficulty-msg (new message%
                               [parent panel]
                               [label "Difficulty Level: Easy"]

@@ -7,7 +7,8 @@
 
 (define (make-save-panel save-file-path user-name-get options-get master-panel handle-event)
   (let* ([panel (new vertical-panel%
-                     [parent master-panel])]
+                     [parent master-panel]
+                     [alignment '(center center)])]
          [msg (new message%
                    [parent panel]
                    [label "Name is valid"]

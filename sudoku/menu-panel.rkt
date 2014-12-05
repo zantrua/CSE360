@@ -11,7 +11,8 @@
 
 (define (make-menu-panel get-user-name master-panel handle-event)
   (let* ([panel (new vertical-panel%
-                          [parent master-panel])]
+                          [parent master-panel]
+                          [alignment '(center center)])]
          [message (new message%
                        [parent panel]
                        [label "Hello, user"]

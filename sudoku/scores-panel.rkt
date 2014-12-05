@@ -31,7 +31,8 @@
 
 (define (make-scores-panel master-panel handle-event)
   (letrec ([panel (new vertical-panel%
-                       [parent master-panel])]
+                       [parent master-panel]
+                       [alignment '(center center)])]
            [menu-button (new button%
                              [parent panel]
                              [label "Menu"]

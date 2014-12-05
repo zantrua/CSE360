@@ -9,7 +9,8 @@
 
 (provide draw-puzzle handle-click get-border-size)
 
-(define thick-pen (send the-pen-list find-or-create-pen "black" 3 'solid))
+; The pens and fonts
+(define thick-pen (send the-pen-list find-or-create-pen "black" 5 'solid))
 (define thin-pen (send the-pen-list find-or-create-pen "black" 1 'solid))
 (define large-font (send the-font-list find-or-create-font 20 'default 'normal 'normal))
 (define small-font (send the-font-list find-or-create-font 10 'default 'normal 'normal))
@@ -24,7 +25,7 @@
   (let-values ([(size-x size-y) (send dc get-size)])
     (define width (puzzle-width puzzle))
     (define square-size size-x)
-    (define (get-pen x)
+    (define (get-pen x) ; The pen is thin unless on the edge of a sub board
       (if (= 0 (modulo x (sqrt width)))
           thick-pen
           thin-pen))
@@ -48,10 +49,10 @@
          [value (tile-get-value (puzzle-ref puzzle pos))]
          [n (sqrt (puzzle-width puzzle))])
     (draw-frame puzzle dc x y)
-    (if (= value 0)
+    (if (= value 0) ; For empty squares
         (begin
           (send dc set-font small-font)
-          (for* ([i n][j n])
+          (for* ([i n][j n]) ; Draw a small grid of numbers, generate a click rect for each
             (let*-values ([(tile) (puzzle-ref puzzle pos)]
                           [(value) (+ 1 i (* j n))]
                           [(text) (format "~a" value)]
@@ -62,6 +63,7 @@
                                                                                                                       (+ (* y square-size) text-y))
                                                                                                             (make-pos text-width
                                                                                                                       text-height)))])
+              ; Set the color based on the mark state
               (send dc set-text-foreground (if (set-member? (tile-get-marked tile) value)
                                                (make-object color% 255 0 0)
                                                (make-object color%)))
@@ -78,16 +80,19 @@
                                                                                                     (make-pos text-width
                                                                                                               text-height)))])
             (set! click-rects (cons rect click-rects))
-            (send dc set-text-foreground
-                  (cond [(tile-get-hinted (puzzle-ref puzzle pos)) (make-object color% 255 0 0)]
-                        [(tile-get-locked (puzzle-ref puzzle pos)) (make-object color%)]
-                        [else (make-object color% 0 0 255)]))
+            (send dc set-text-foreground ; Set color based on tile state
+                  (cond [(tile-get-hinted (puzzle-ref puzzle pos)) (make-object color% 255 0 0)] ; red for hints
+                        [(tile-get-locked (puzzle-ref puzzle pos)) (make-object color% 0 0 0)] ; black for locked
+                        [else (make-object color% 0 0 255)])) ; blue for user
             (send dc draw-text text text-x text-y))))
     bitmap))
 
 (define (draw-puzzle puzzle dc)
   (let-values ([(size-x size-y) (send dc get-size)])
     (define width (puzzle-width puzzle))
+    (set! small-font (send the-font-list find-or-create-font (cond ((= width 9) 10) ; Adjust font size for different boards
+                                                                   ((= width 16) 8)
+                                                                   ((= width 25) 5)) 'default 'normal 'normal))
     (define square-size (/ size-x width))
     (set! click-rects empty)
     (for* ([x width][y width])
@@ -108,14 +113,14 @@
                             (replace-puzzle-tile puzzle
                                                  pos
                                                  (tile-toggle-marked (puzzle-ref puzzle pos) value))
-                            puzzle)))))
+                            puzzle))))) ; Set tile when it's empty and clicked
 
 (define (click-function-large puzzle x y)
   (let ([pos (make-pos x y)])
     (λ (click-type)
       (if (tile-get-locked (puzzle-ref puzzle pos))
           puzzle
-          (replace-puzzle-tile puzzle pos (make-empty-tile))))))
+          (replace-puzzle-tile puzzle pos (make-empty-tile)))))) ; Clear tile when it's full and clicked
 
 (define (handle-click puzzle pos click-type)
   (let* ([click-rect (findf (λ (rect) (rectangle-contains? (cdr rect) pos)) click-rects)]

@@ -26,7 +26,8 @@
 
 (define (make-win-panel scores-file-path-local master-panel handle-event)
   (let* ([panel (new vertical-panel%
-                     [parent master-panel])]
+                     [parent master-panel]
+                     [alignment '(center center)])]
          [menu-button (new button%
                            [parent panel]
                            [label "Menu"]

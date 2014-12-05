@@ -4,7 +4,7 @@
 
 (provide 
  make-save-file
- make-save-file-user save-file-user-get-name save-file-user-get-pass-hash save-file-user-get-games
+ make-save-file-user save-file-user-get-name save-file-user-get-pass-hash save-file-user-get-pass-salt save-file-user-get-games
  make-save-file-game save-file-game-get-name save-file-game-get-level save-file-game-get-time
  save-file-game-get-hints save-file-game-get-wrong-moves save-file-game-get-board)
 
@@ -15,8 +15,8 @@
 
 ; Users
 
-(define (make-save-file-user name pass-hash games)
-  (list name pass-hash games))
+(define (make-save-file-user name pass-hash salt games)
+  (list name pass-hash salt games))
 
 (define (save-file-user-get-name user)
   (first user))
@@ -24,8 +24,11 @@
 (define (save-file-user-get-pass-hash user)
   (second user))
 
-(define (save-file-user-get-games user)
+(define (save-file-user-get-pass-salt user)
   (third user))
+
+(define (save-file-user-get-games user)
+  (fourth user))
 
 ; Games
 

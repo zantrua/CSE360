@@ -92,15 +92,19 @@
 
 ; Login system
 
-(define (password-hash pass)
-  (bytes->hex-string (sha256 (string->bytes/utf-8 pass))))
+(define (make-salt)
+  (map (λ (x) (string-ref "0123456789abcdef" (random 16))) (range 64)))
+
+(define (password-hash pass salt)
+  (bytes->hex-string (sha256 (string->bytes/utf-8 (string-append pass salt)))))
 
 (define (make-login name pass)
   (if (and (> (string-length name) 0)
            (> (string-length pass) 0))
       (let* ([save-value (file->value save-file-path)]
              [matches (filter (λ (x) (string=? (save-file-user-get-name x) name)) save-value)]
-             [pass-hash (password-hash pass)])
+             [salt (make-salt)]
+             [pass-hash (password-hash pass salt)])
         (if (empty? matches)
             (begin (with-output-to-file save-file-path (λ () (write (cons (make-save-file-user name pass-hash '()) save-value))) #:exists 'replace)
                    (set! user-name name)
@@ -111,12 +115,17 @@
 
 (define (check-login name pass)
   (let* ([save-value (file->value save-file-path)]
-         [matches (filter (λ (x) (string=? (save-file-user-get-name x) name)) save-value)]
-         [pass-hash (password-hash pass)])
-    (set! user-name name)
-    (set-user-greeting name)
-    (and (not (empty? matches))
-         (string=? (save-file-user-get-pass-hash (first matches)) pass-hash))))
+         [matches (filter (λ (x) (string=? (save-file-user-get-name x) name)) save-value)])
+    (if (not (empty? matches))
+        (let* ([user (first matches)]
+               [salt (save-file-user-get-pass-salt user)]
+               [pass-hash (password-hash pass salt)])
+          (if (string=? (save-file-user-get-pass-hash user) pass-hash)
+              (begin (set! user-name name)
+                     (set-user-greeting name)
+                     #t)
+              #f))
+        #f)))
 
 (define (user-name-get)
   user-name)
@@ -134,12 +143,6 @@
        [label "Sudoku"]
        [min-width (+ frame-size (get-border-size))]
        [min-height (+ frame-size (get-border-size))]))
-
-(define (init-frame frame game-panel)
-  (let-values ([(frame-sx frame-sy) (send frame get-size)]
-               [(game-sx game-sy) (send game-panel get-size)])
-    (send frame min-width (+ frame-sx game-sx))
-    (send frame min-height (+ frame-sy game-sy))))
 
 (define (make-master-panel frame)
   (new panel%
@@ -163,8 +166,6 @@
 (define load-panel (make-load-panel load-game-options save-file-path user-name-get master-panel handle-event))
 (define scores-panel (make-scores-panel master-panel handle-event))
 (define win-panel (make-win-panel scores-file-path master-panel handle-event))
-
-(init-frame frame game-panel)
 
 (define (clear-panels)
   (send login-panel show #f)

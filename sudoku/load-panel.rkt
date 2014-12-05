@@ -15,7 +15,8 @@
 
 (define (make-load-panel load-game-options save-file-path get-user-name master-panel handle-event)
   (let* ([panel (new vertical-panel%
-                     [parent master-panel])]
+                     [parent master-panel]
+                     [alignment '(center center)])]
          [game-list-inner (new list-box%
                                [parent panel]
                                [label "Games"]

@@ -12,7 +12,6 @@
 (define puzzle empty)
 (define options empty)
 
-(define mistakes-message empty)
 (define hints-message empty)
 
 (define (set-options difficulty size)
@@ -27,7 +26,6 @@
     (set! mistakes 0)
     (set! hints-used 0)
     (set! game-difficulty difficulty)
-    (send mistakes-message set-label "Mistakes: 0")
     (send hints-message set-label (format "Hints left: ~a" (- (get-hints-allowed) hints-used)))))
 
 (define (load-game-options difficulty time hints mistakes-inner board)
@@ -37,7 +35,6 @@
   (set! hints-used hints)
   (set! mistakes mistakes-inner)
   (set! puzzle board)
-  (send mistakes-message set-label (format "Mistakes: ~a" mistakes))
   (send hints-message set-label (format "Hints left: ~a" (- (get-hints-allowed) hints-used))))
 
 (define (get-avg-time)
@@ -53,12 +50,16 @@
 
 (define (calc-score)
   (let ([width (puzzle-width puzzle)])
+    ; 100 * completed_squares - 100 * hints_used - 50 * mistakes - 4 * seconds
     (- (* 100 (length (filter-map (λ (pos) (let ([tile (puzzle-ref puzzle pos)])
-                                      (not (= (tile-get-value tile) 0)))) (cartesian-product (range width) (range width)))))
-       (* 100 hints-used) (* 50 mistakes) seconds)))
+                                      (not (or (= (tile-get-value tile) 0)
+                                               (tile-get-locked tile))))) (cartesian-product (range width) (range width)))))
+       (* 100 hints-used) (* 50 mistakes) (* 4 seconds))))
 
 (define (make-game-panel set-save-options set-score get-user-name master-panel handle-event)
-  (letrec ([game-panel (new vertical-panel% [parent master-panel])]
+  (letrec ([game-panel (new vertical-panel%
+                            [parent master-panel]
+                            [alignment '(center center)])]
            [game-bar-panel (new horizontal-panel%
                                 [parent game-panel]
                                 [stretchable-height #f])]
@@ -83,7 +84,7 @@
                                                                (set! hints-used (+ 1 hints-used))
                                                                (send game-canvas refresh)
                                                                (send hints-msg set-label (format "Hints left: ~a" (- (get-hints-allowed) hints-used)))
-                                                               (if (puzzle-solved? puzzle #t)
+                                                               (if (puzzle-solved? puzzle #t) ; If it's completely solved by the hint, win screen
                                                                    (begin (set-score (calc-score) (symbol->string game-difficulty) (get-user-name))
                                                                           (handle-event 'complete))
                                                                    (void)))
@@ -98,10 +99,6 @@
                            [parent game-bar-panel]
                            [label "Time: 0"]
                            [auto-resize #t])]
-           [mistakes-msg (new message%
-                              [parent game-bar-panel]
-                              [label "Mistakes: 0"]
-                              [auto-resize #t])]
            [hints-msg (new message%
                            [parent game-bar-panel]
                            [label "Hints left: 0"]
@@ -115,14 +112,13 @@
                                  (if (or (eq? event-type 'left-down) 
                                          (eq? event-type 'right-down))
                                      (begin (set! puzzle (handle-click puzzle mouse-pos event-type))
-                                            (send game-canvas refresh)
-                                            (if (puzzle-solved? puzzle #t)
+                                            (send game-canvas refresh) ; Update the screen
+                                            (if (puzzle-solved? puzzle #t) ; If it's totally solved, win screen
                                                 (begin (set-score (calc-score) (symbol->string game-difficulty) (get-user-name))
                                                        (handle-event 'complete))
-                                                (if (puzzle-solved? puzzle #f)
+                                                (if (puzzle-solved? puzzle #f) ; If they made a mistake, count it
                                                     (void)
-                                                    (begin (set! mistakes (+ 1 mistakes))
-                                                           (send mistakes-msg set-label (format "Mistakes: ~a" mistakes))))))
+                                                    (set! mistakes (+ 1 mistakes)))))
                                      (void))))
                              (super-new))]
            [game-canvas (new sudoku-canvas%
@@ -132,6 +128,5 @@
                        [interval 1000]
                        [notify-callback (λ () (set! seconds (+ 1 seconds))
                                               (send time-msg set-label (format "Time: ~a" seconds)))])])
-    (set! mistakes-message mistakes-msg)
     (set! hints-message hints-msg)
     game-panel))

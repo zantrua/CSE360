@@ -7,7 +7,7 @@
 (define (make-about-panel master-panel handle-event)
   (let* ([panel (new vertical-panel%
                            [parent master-panel]
-                           [alignment '(left top)])]
+                           [alignment '(center center)])]
          [about-button (new button%
                             [parent panel]
                             [label "Menu"]

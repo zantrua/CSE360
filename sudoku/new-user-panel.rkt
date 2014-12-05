@@ -6,7 +6,8 @@
 
 (define (make-new-user-panel make-login master-panel handle-event)
   (let* ([new-user-panel (new vertical-panel%
-                              [parent master-panel])]
+                              [parent master-panel]
+                              [alignment '(center center)])]
          [user-name (new text-field%
                          [parent new-user-panel]
                          [label "Username"]
