@@ -106,7 +106,7 @@
              [salt (make-salt)]
              [pass-hash (password-hash pass salt)])
         (if (empty? matches)
-            (begin (with-output-to-file save-file-path (λ () (write (cons (make-save-file-user name pass-hash '()) save-value))) #:exists 'replace)
+            (begin (with-output-to-file save-file-path (λ () (write (cons (make-save-file-user name pass-hash salt '()) save-value))) #:exists 'replace)
                    (set! user-name name)
                    (set-user-greeting name)
                    #t)
